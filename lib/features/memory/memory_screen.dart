@@ -92,7 +92,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
             NeuIconButton(
               icon: Icons.search_rounded,
               onSky: false,
-              semanticLabel: 'Search', // l10n-todo
+              semanticLabel: s.searchAction,
               onTap: () => context.go('/search'),
             ),
           ],
@@ -134,7 +134,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
             children: [
               Semantics(
                 button: true,
-                label: 'Clear date filter', // l10n-todo
+                label: s.clearDateFilter,
                 child: JaraChip(
                   label: '${day.day}.${day.month}',
                   icon: Icons.event_rounded,

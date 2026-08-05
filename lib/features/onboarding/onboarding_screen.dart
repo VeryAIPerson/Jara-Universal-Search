@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/data/prefs.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/motion.dart';
 import '../../core/design/tokens.dart';
@@ -83,7 +84,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     super.dispose();
   }
 
-  void _finish(BuildContext context) => context.go('/search');
+  // Shared by Skip, the primary CTA and the secondary CTA — every way off
+  // this screen marks onboarding seen before handing off to search.
+  void _finish(BuildContext context) {
+    ref.read(prefsProvider).setHasSeenOnboarding(true);
+    context.go('/search');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +364,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         JaraChip(
-          label: 'Safari', // l10n-todo: illustrative source-app name
+          label: 'Safari', // brand name — not translatable
           color: t.accentBright,
           icon: Icons.ios_share_rounded,
         ),
@@ -444,7 +450,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             )
           : JaraButton(
               key: const ValueKey('cta-continue'),
-              label: 'Continue', // l10n-todo: interim step label, not a screen title
+              label: s.continueCta,
               expanded: true,
               onTap: () => _pageController.nextPage(
                 duration: JaraMotion.of(context, JaraMotion.gentle),

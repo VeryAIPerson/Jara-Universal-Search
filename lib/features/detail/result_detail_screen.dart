@@ -214,7 +214,7 @@ class ResultDetailScreen extends ConsumerWidget {
               children: [
                 NeuIconButton(
                   icon: Icons.arrow_back_ios_new_rounded,
-                  semanticLabel: 'Back', // l10n-todo
+                  semanticLabel: s.back,
                   onTap: () => context.pop(),
                 ),
                 const Spacer(),
@@ -235,7 +235,7 @@ class ResultDetailScreen extends ConsumerWidget {
                 const SizedBox(width: 10),
                 NeuIconButton(
                   icon: Icons.more_horiz_rounded,
-                  semanticLabel: 'More actions', // l10n-todo
+                  semanticLabel: s.moreActions,
                   onTap: () => _showActions(context, ref, s, item),
                 ),
               ],

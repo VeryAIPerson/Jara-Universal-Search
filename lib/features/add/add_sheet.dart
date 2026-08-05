@@ -158,6 +158,7 @@ class _AddSheetState extends ConsumerState<_AddSheet> {
   /// [useDefaults] powers "Save instantly": skip whatever the user edited
   /// and commit the mocked suggestion as-is.
   void _save({required bool useDefaults}) {
+    final s = ref.read(stringsProvider);
     final option = _selected!;
     final typedTitle = _titleController.text.trim();
     final title = useDefaults || typedTitle.isEmpty
@@ -167,8 +168,8 @@ class _AddSheetState extends ConsumerState<_AddSheet> {
       id: 'user-${DateTime.now().millisecondsSinceEpoch}',
       type: option.type!,
       title: title,
-      snippet: 'Added just now — JARA is indexing this memory.', // l10n-todo
-      source: 'Manual add', // l10n-todo
+      snippet: s.addedJustNow,
+      source: s.manualAddSource,
       date: DateTime.now(),
       tags: _tags,
       collection: useDefaults ? null : _collection,
@@ -291,7 +292,7 @@ class _AddSheetState extends ConsumerState<_AddSheet> {
             NeuIconButton(
               icon: Icons.chevron_left_rounded,
               onTap: _back,
-              semanticLabel: 'Back', // l10n-todo
+              semanticLabel: s.back,
             ),
             const SizedBox(width: JaraSpacing.md),
             Expanded(
@@ -419,11 +420,11 @@ class _AddSheetState extends ConsumerState<_AddSheet> {
         const SizedBox(height: JaraSpacing.sm),
         Pressable(
           onTap: () => Navigator.pop(context),
-          semanticLabel: 'Done', // l10n-todo
+          semanticLabel: s.done,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: JaraSpacing.xs),
             child: Text(
-              'Done', // l10n-todo
+              s.done,
               style: JaraType.callout.copyWith(color: t.accent),
             ),
           ),

@@ -56,7 +56,7 @@ class CollectionDetailScreen extends ConsumerWidget {
               children: [
                 NeuIconButton(
                   icon: Icons.arrow_back_ios_new_rounded,
-                  semanticLabel: 'Back', // l10n-todo
+                  semanticLabel: s.back,
                   onTap: () => context.pop(),
                 ),
                 const SizedBox(width: JaraSpacing.md),

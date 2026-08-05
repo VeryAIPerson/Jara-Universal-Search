@@ -44,14 +44,14 @@ Future<void> showSearchFilterSheet(BuildContext context) {
   );
 }
 
-class _VoiceSheet extends StatefulWidget {
+class _VoiceSheet extends ConsumerStatefulWidget {
   const _VoiceSheet();
 
   @override
-  State<_VoiceSheet> createState() => _VoiceSheetState();
+  ConsumerState<_VoiceSheet> createState() => _VoiceSheetState();
 }
 
-class _VoiceSheetState extends State<_VoiceSheet>
+class _VoiceSheetState extends ConsumerState<_VoiceSheet>
     with SingleTickerProviderStateMixin {
   /// Demo transcription until the on-device STT engine lands (D12).
   static const _demoQuery = 'passport photo';
@@ -91,6 +91,7 @@ class _VoiceSheetState extends State<_VoiceSheet>
   @override
   Widget build(BuildContext context) {
     final t = context.jara;
+    final s = ref.strings;
     final reduced = JaraMotion.reduced(context);
 
     return SizedBox(
@@ -119,8 +120,7 @@ class _VoiceSheetState extends State<_VoiceSheet>
           Semantics(
             liveRegion: true,
             child: Text(
-              // l10n-todo: no voice-capture keys in the copy deck yet.
-              'Listening…',
+              s.listening,
               style: JaraType.callout.copyWith(color: t.textOnSkySecondary),
             ),
           ),
@@ -277,8 +277,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
               ],
             ),
             const SizedBox(height: JaraSpacing.xxl),
-            // l10n-todo: no "sort by" key in the copy deck yet.
-            const SectionHeader(title: 'Sort by'),
+            SectionHeader(title: s.sortBy),
             Row(
               children: [
                 _SortChip(
@@ -296,8 +295,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
             ),
             const SizedBox(height: JaraSpacing.xxl),
             JaraButton(
-              // l10n-todo: no "apply" key in the copy deck yet.
-              label: 'Apply',
+              label: s.apply,
               expanded: true,
               onTap: () => Navigator.of(context).pop(),
             ),

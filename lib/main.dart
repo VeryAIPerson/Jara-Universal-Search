@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
+import 'core/data/prefs.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -13,5 +14,10 @@ void main() {
     ),
   );
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  runApp(const ProviderScope(child: JaraApp()));
+  // Loaded once before runApp so screens can read prefs synchronously.
+  final prefs = await JaraPrefs.create();
+  runApp(ProviderScope(
+    overrides: [prefsProvider.overrideWithValue(prefs)],
+    child: const JaraApp(),
+  ));
 }

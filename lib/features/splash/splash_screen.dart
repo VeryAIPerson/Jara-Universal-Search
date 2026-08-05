@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/data/prefs.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/motion.dart';
 import '../../core/design/tokens.dart';
@@ -72,7 +73,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void _goNext() {
     if (_navigated || !mounted) return;
     _navigated = true;
-    context.go('/onboarding');
+    final seen = ref.read(prefsProvider).hasSeenOnboarding;
+    context.go(seen ? '/search' : '/onboarding');
   }
 
   void _skip() {
@@ -109,7 +111,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     delayMs: 200,
                     reduced: reduced,
                     child: Text(
-                      'Universal Search', // l10n-todo: no key; appName carries full brand
+                      s.productName,
                       textAlign: TextAlign.center,
                       style: JaraType.title2.copyWith(color: t.textOnSky),
                     ),

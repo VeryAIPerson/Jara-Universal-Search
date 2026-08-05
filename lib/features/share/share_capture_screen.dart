@@ -41,13 +41,14 @@ class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
   }
 
   void _saveInstantly() {
+    final s = ref.read(stringsProvider);
     final typed = _titleController.text.trim();
     final item = MemoryItem(
       id: 'user-${DateTime.now().millisecondsSinceEpoch}',
       type: MemoryType.link,
       title: typed.isEmpty ? _mockTitle : typed,
-      snippet: 'Added just now — JARA is indexing this memory.', // l10n-todo
-      source: 'Manual add', // l10n-todo
+      snippet: s.addedJustNow,
+      source: s.manualAddSource,
       date: DateTime.now(),
       tags: _mockTags,
       collection: _collection ?? 'VoxBridge',

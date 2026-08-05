@@ -122,14 +122,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 Page<void> _detailPageBuilder(BuildContext context, GoRouterState state) {
   final id = state.pathParameters['id']!;
   if (JaraBreakpoints.of(context).usesTwoPane) {
-    return CustomTransitionPage<void>(
+    return _PanePage(
       key: state.pageKey,
       name: state.name ?? state.path,
       restorationId: state.pageKey.value,
-      opaque: false,
-      transitionDuration: Duration.zero,
-      reverseTransitionDuration: Duration.zero,
-      transitionsBuilder: (context, animation, secondary, child) => child,
       child: _DetailPaneHandoff(itemId: id),
     );
   }
@@ -143,6 +139,54 @@ Page<void> _detailPageBuilder(BuildContext context, GoRouterState state) {
     },
     child: ResultDetailScreen(itemId: id),
   );
+}
+
+/// The `/item/:id` page on two-pane windows. It is a real route — pop,
+/// system back and deep links behave exactly as on a phone — but it paints
+/// nothing, drops the modal barrier so the list beside it stays clickable
+/// and readable by a screen reader, and leaves focus in the shell.
+class _PanePage extends Page<void> {
+  const _PanePage({
+    required this.child,
+    super.key,
+    super.name,
+    super.restorationId,
+  });
+
+  final Widget child;
+
+  @override
+  Route<void> createRoute(BuildContext context) => _PaneRoute(this);
+}
+
+class _PaneRoute extends PageRoute<void> {
+  _PaneRoute(_PanePage page) : super(settings: page, requestFocus: false);
+
+  @override
+  bool get opaque => false;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  Duration get transitionDuration => Duration.zero;
+
+  @override
+  Widget buildModalBarrier() => const SizedBox.shrink();
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) =>
+      (settings as _PanePage).child;
 }
 
 /// Stand-in for the detail page on two-pane windows. A deep link that

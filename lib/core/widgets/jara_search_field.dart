@@ -191,11 +191,12 @@ class _JaraSearchFieldState extends State<JaraSearchField> {
       ),
     );
 
-    if (!widget.hero) return field;
-    return Hero(
-      tag: 'jara-search-field',
-      child: Material(type: MaterialType.transparency, child: field),
-    );
+    // TextField needs a Material ancestor; provide our own (transparent,
+    // zero visual effect) so the field also stands outside a Scaffold —
+    // hero flights already required it on the hero path.
+    final material = Material(type: MaterialType.transparency, child: field);
+    if (!widget.hero) return material;
+    return Hero(tag: 'jara-search-field', child: material);
   }
 }
 

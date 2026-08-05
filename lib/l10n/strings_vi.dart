@@ -319,6 +319,53 @@ class JaraStringsVi extends JaraStrings {
       'Trí tuệ đám mây, kết nối không giới hạn và lập chỉ mục ưu tiên.';
 
   @override
+  String get paywallTitle => 'Vươn xa hơn khi bạn cần';
+  @override
+  String get paywallSubtitle =>
+      'Premium bổ sung ba điều cho JARA. Việc tìm kiếm vẫn giữ nguyên như '
+      'cũ.';
+  @override
+  String get paywallFeatCloudTitle => 'Trí tuệ đám mây';
+  @override
+  String get paywallFeatCloudBody =>
+      'Câu trả lời đầy đủ hơn khi bạn chọn đám mây. Tính năng này tắt cho '
+      'đến khi bạn bật, và quyền quyết định luôn thuộc về bạn.';
+  @override
+  String get paywallFeatConnectionsTitle => 'Kết nối không giới hạn';
+  @override
+  String get paywallFeatConnectionsBody =>
+      'Gói miễn phí giữ kết nối một số nguồn nhất định. Premium kết nối mọi '
+      'tài khoản bạn dùng.';
+  @override
+  String get paywallFeatIndexingTitle => 'Lập chỉ mục ưu tiên';
+  @override
+  String get paywallFeatIndexingBody =>
+      'Những gì vừa lưu sẽ tìm kiếm được trước, ngay cả khi một lần nhập lớn '
+      'đang chạy.';
+  @override
+  String get paywallMonthly => 'Hằng tháng';
+  @override
+  String get paywallYearly => 'Hằng năm';
+  @override
+  String get paywallYearlyBadge => 'Đáng giá nhất';
+  @override
+  String get paywallPriceNote =>
+      'Giá hiển thị khi thanh toán, theo đơn vị tiền tệ của khu vực bạn.';
+  @override
+  String get paywallCta => 'Bắt đầu với Premium';
+  @override
+  String get paywallRestore => 'Khôi phục giao dịch mua';
+  @override
+  String get paywallTerms => 'Điều khoản';
+  @override
+  String get paywallSearchFree =>
+      'Tìm trong bộ nhớ của riêng bạn luôn miễn phí. Premium không bao giờ '
+      'khóa những gì bạn đã có.';
+  @override
+  String get paywallNotWiredNote =>
+      'Tính năng mua sẽ có trong bản phát hành trên cửa hàng.';
+
+  @override
   String get back => 'Quay lại';
   @override
   String get moreActions => 'Thao tác khác';

@@ -319,6 +319,45 @@ class JaraStringsJa extends JaraStrings {
       'クラウドインテリジェンス、無制限の連携、優先インデックス作成。';
 
   @override
+  String get paywallTitle => '必要なときに、もう一歩先へ';
+  @override
+  String get paywallSubtitle => 'PremiumはJARAに3つの機能を加えます。検索はこれまでどおりです。';
+  @override
+  String get paywallFeatCloudTitle => 'クラウドインテリジェンス';
+  @override
+  String get paywallFeatCloudBody =>
+      'クラウドを選んだときに、より詳しい回答が返ります。オンにするまではオフのままで、選ぶのはいつでもあなたです。';
+  @override
+  String get paywallFeatConnectionsTitle => '無制限の連携';
+  @override
+  String get paywallFeatConnectionsBody =>
+      '無料プランでは連携できるソースの数に上限があります。Premiumなら、使っているアカウントをすべて連携できます。';
+  @override
+  String get paywallFeatIndexingTitle => '優先インデックス作成';
+  @override
+  String get paywallFeatIndexingBody =>
+      '新しく保存したものから先に検索できるようになります。大きな取り込みの途中でも変わりません。';
+  @override
+  String get paywallMonthly => '月額';
+  @override
+  String get paywallYearly => '年額';
+  @override
+  String get paywallYearlyBadge => 'いちばんお得';
+  @override
+  String get paywallPriceNote => '価格はお支払いの画面で、お住まいの地域の通貨で表示されます。';
+  @override
+  String get paywallCta => 'Premiumをはじめる';
+  @override
+  String get paywallRestore => '購入を復元';
+  @override
+  String get paywallTerms => '利用規約';
+  @override
+  String get paywallSearchFree =>
+      '自分の記憶を検索する機能は、ずっと無料です。すでに持っているものにPremiumが鍵をかけることはありません。';
+  @override
+  String get paywallNotWiredNote => '購入機能はストア版で提供予定です。';
+
+  @override
   String get back => '戻る';
   @override
   String get moreActions => 'その他の操作';

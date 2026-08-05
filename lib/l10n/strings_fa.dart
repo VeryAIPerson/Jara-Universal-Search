@@ -334,6 +334,47 @@ class JaraStringsFa extends JaraStrings {
       'هوش ابری، اتصال‌های نامحدود و نمایه‌سازی با اولویت.';
 
   @override
+  String get paywallTitle => 'دسترسی بیشتر، هر وقت لازم داشتید';
+  @override
+  String get paywallSubtitle =>
+      'Premium سه چیز به JARA اضافه می‌کند. جست‌وجو دقیقاً همان‌طور که هست می‌ماند.';
+  @override
+  String get paywallFeatCloudTitle => 'هوش ابری';
+  @override
+  String get paywallFeatCloudBody =>
+      'پاسخ‌های کامل‌تر وقتی ابر را انتخاب می‌کنید. تا خودتان روشنش نکنید خاموش می‌ماند و تصمیم همیشه با شماست.';
+  @override
+  String get paywallFeatConnectionsTitle => 'اتصال‌های نامحدود';
+  @override
+  String get paywallFeatConnectionsBody =>
+      'در طرح رایگان تعداد محدودی منبع متصل می‌ماند. با Premium هر حسابی را که استفاده می‌کنید وصل کنید.';
+  @override
+  String get paywallFeatIndexingTitle => 'نمایه‌سازی با اولویت';
+  @override
+  String get paywallFeatIndexingBody =>
+      'موردهای تازه زودتر قابل جست‌وجو می‌شوند، حتی وقتی درون‌ریزی بزرگی در جریان است.';
+  @override
+  String get paywallMonthly => 'ماهانه';
+  @override
+  String get paywallYearly => 'سالانه';
+  @override
+  String get paywallYearlyBadge => 'به‌صرفه‌ترین';
+  @override
+  String get paywallPriceNote =>
+      'قیمت هنگام پرداخت، به واحد پول منطقهٔ شما نشان داده می‌شود.';
+  @override
+  String get paywallCta => 'شروع با Premium';
+  @override
+  String get paywallRestore => 'بازیابی خریدها';
+  @override
+  String get paywallTerms => 'شرایط';
+  @override
+  String get paywallSearchFree =>
+      'جست‌وجو در حافظهٔ خودتان همیشه رایگان است. Premium هرگز چیزی را که همین حالا دارید قفل نمی‌کند.';
+  @override
+  String get paywallNotWiredNote => 'خریدها با نسخهٔ فروشگاه می‌آیند.';
+
+  @override
   String get back => 'بازگشت';
   @override
   String get moreActions => 'کارهای بیشتر';

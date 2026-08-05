@@ -164,6 +164,29 @@ abstract class JaraStrings {
   String get settingsPremium;
   String get settingsPremiumBody;
 
+  // Paywall — what Premium sells (D9). No price key exists on purpose:
+  // store pricing is unset, so the screen shows an em-dash and defers to
+  // checkout rather than shipping an invented number in 20 markets.
+  String get paywallTitle;
+  String get paywallSubtitle;
+  String get paywallFeatCloudTitle;
+  String get paywallFeatCloudBody;
+  String get paywallFeatConnectionsTitle;
+  String get paywallFeatConnectionsBody;
+  String get paywallFeatIndexingTitle;
+  String get paywallFeatIndexingBody;
+  String get paywallMonthly;
+  String get paywallYearly;
+  String get paywallYearlyBadge;
+  String get paywallPriceNote;
+  String get paywallCta;
+  String get paywallRestore;
+  String get paywallTerms;
+
+  /// The D9 promise: search over your own memory is never gated.
+  String get paywallSearchFree;
+  String get paywallNotWiredNote;
+
   // Generic UI verbs / section labels
   String get back;
   String get moreActions;

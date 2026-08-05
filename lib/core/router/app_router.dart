@@ -14,6 +14,7 @@ import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/privacy/privacy_screen.dart';
 import '../../features/search/search_home_screen.dart';
 import '../../features/search/search_results_screen.dart';
+import '../../features/settings/paywall_screen.dart';
 import '../../features/settings/profile_screen.dart';
 import '../../features/share/share_capture_screen.dart';
 import '../../features/splash/splash_screen.dart';
@@ -101,6 +102,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'privacy',
                   builder: (context, state) => const PrivacyScreen(),
+                ),
+                GoRoute(
+                  path: 'premium',
+                  builder: (context, state) => const PaywallScreen(),
                 ),
               ],
             ),

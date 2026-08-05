@@ -243,7 +243,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _premiumCard(JaraTokens t, JaraStrings s) {
     return NeuCard(
-      onTap: () => _snack(s.settingsSubscription),
+      onTap: () => context.push('/profile/premium'),
       semanticLabel: s.settingsPremium,
       child: Row(
         children: [

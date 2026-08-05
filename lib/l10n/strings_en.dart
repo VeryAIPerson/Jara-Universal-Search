@@ -319,6 +319,51 @@ class JaraStringsEn extends JaraStrings {
       'Cloud Intelligence, unlimited connections and priority indexing.';
 
   @override
+  String get paywallTitle => 'More reach, when you need it';
+  @override
+  String get paywallSubtitle =>
+      'Premium adds three things to JARA. Search stays exactly as it is.';
+  @override
+  String get paywallFeatCloudTitle => 'Cloud Intelligence';
+  @override
+  String get paywallFeatCloudBody =>
+      'Richer answers when you choose the cloud. It stays off until you turn '
+      'it on, and the choice stays yours.';
+  @override
+  String get paywallFeatConnectionsTitle => 'Unlimited connections';
+  @override
+  String get paywallFeatConnectionsBody =>
+      'The free plan keeps a limited set of sources connected. Premium '
+      'connects every account you use.';
+  @override
+  String get paywallFeatIndexingTitle => 'Priority indexing';
+  @override
+  String get paywallFeatIndexingBody =>
+      'New saves become searchable first, even while a large import is still '
+      'running.';
+  @override
+  String get paywallMonthly => 'Monthly';
+  @override
+  String get paywallYearly => 'Yearly';
+  @override
+  String get paywallYearlyBadge => 'Best value';
+  @override
+  String get paywallPriceNote =>
+      'The price appears at checkout, in the currency of your region.';
+  @override
+  String get paywallCta => 'Start with Premium';
+  @override
+  String get paywallRestore => 'Restore purchases';
+  @override
+  String get paywallTerms => 'Terms';
+  @override
+  String get paywallSearchFree =>
+      'Searching your own memory is free, always. Premium never locks what '
+      'you already have.';
+  @override
+  String get paywallNotWiredNote => 'Purchases arrive with the store build.';
+
+  @override
   String get back => 'Back';
   @override
   String get moreActions => 'More actions';

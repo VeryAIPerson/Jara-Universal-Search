@@ -321,6 +321,48 @@ class JaraStringsTh extends JaraStrings {
       'ระบบอัจฉริยะบนคลาวด์ การเชื่อมต่อไม่จำกัด และการจัดทำดัชนีแบบมีลำดับความสำคัญ';
 
   @override
+  String get paywallTitle => 'เข้าถึงได้มากขึ้นเมื่อคุณต้องการ';
+  @override
+  String get paywallSubtitle =>
+      'Premium เพิ่มสามอย่างให้ JARA ส่วนการค้นหายังคงเหมือนเดิม';
+  @override
+  String get paywallFeatCloudTitle => 'ระบบอัจฉริยะบนคลาวด์';
+  @override
+  String get paywallFeatCloudBody =>
+      'คำตอบที่ละเอียดขึ้นเมื่อคุณเลือกใช้คลาวด์ ระบบจะปิดอยู่จนกว่าคุณจะเปิดเอง '
+      'และการตัดสินใจเป็นของคุณเสมอ';
+  @override
+  String get paywallFeatConnectionsTitle => 'การเชื่อมต่อไม่จำกัด';
+  @override
+  String get paywallFeatConnectionsBody =>
+      'แผนฟรีเชื่อมต่อแหล่งข้อมูลได้จำนวนจำกัด ส่วน Premium เชื่อมต่อได้ทุกบัญชีที่คุณใช้';
+  @override
+  String get paywallFeatIndexingTitle => 'การจัดทำดัชนีแบบมีลำดับความสำคัญ';
+  @override
+  String get paywallFeatIndexingBody =>
+      'สิ่งที่บันทึกใหม่จะค้นหาได้ก่อน แม้ระหว่างที่กำลังนำเข้าข้อมูลจำนวนมาก';
+  @override
+  String get paywallMonthly => 'รายเดือน';
+  @override
+  String get paywallYearly => 'รายปี';
+  @override
+  String get paywallYearlyBadge => 'คุ้มค่าที่สุด';
+  @override
+  String get paywallPriceNote =>
+      'ราคาจะแสดงตอนชำระเงิน ในสกุลเงินของภูมิภาคคุณ';
+  @override
+  String get paywallCta => 'เริ่มใช้ Premium';
+  @override
+  String get paywallRestore => 'กู้คืนการซื้อ';
+  @override
+  String get paywallTerms => 'ข้อกำหนด';
+  @override
+  String get paywallSearchFree =>
+      'การค้นหาในความทรงจำของคุณเองฟรีเสมอ Premium ไม่เคยล็อกสิ่งที่คุณมีอยู่แล้ว';
+  @override
+  String get paywallNotWiredNote => 'การซื้อจะมาพร้อมเวอร์ชันบนสโตร์';
+
+  @override
   String get back => 'กลับ';
   @override
   String get moreActions => 'ตัวเลือกเพิ่มเติม';

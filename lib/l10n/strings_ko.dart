@@ -315,6 +315,45 @@ class JaraStringsKo extends JaraStrings {
   String get settingsPremiumBody => '클라우드 인텔리전스, 무제한 연결, 우선 색인 처리를 제공해요.';
 
   @override
+  String get paywallTitle => '필요할 때 더 멀리';
+  @override
+  String get paywallSubtitle => 'Premium은 JARA에 세 가지를 더해요. 검색은 지금 그대로예요.';
+  @override
+  String get paywallFeatCloudTitle => '클라우드 인텔리전스';
+  @override
+  String get paywallFeatCloudBody =>
+      '클라우드를 선택하면 더 자세한 답을 받아요. 켜기 전까지는 꺼져 있고, 켤지 말지는 언제나 직접 정해요.';
+  @override
+  String get paywallFeatConnectionsTitle => '무제한 연결';
+  @override
+  String get paywallFeatConnectionsBody =>
+      '무료 플랜에서는 연결할 수 있는 소스 수가 제한돼요. Premium에서는 사용하는 모든 계정을 연결할 수 있어요.';
+  @override
+  String get paywallFeatIndexingTitle => '우선 색인 처리';
+  @override
+  String get paywallFeatIndexingBody =>
+      '새로 저장한 항목부터 먼저 검색할 수 있어요. 큰 가져오기가 진행 중일 때도 마찬가지예요.';
+  @override
+  String get paywallMonthly => '월간';
+  @override
+  String get paywallYearly => '연간';
+  @override
+  String get paywallYearlyBadge => '가장 알뜰한 선택';
+  @override
+  String get paywallPriceNote => '가격은 결제 화면에서 사용 지역의 통화로 표시돼요.';
+  @override
+  String get paywallCta => 'Premium 시작하기';
+  @override
+  String get paywallRestore => '구매 복원';
+  @override
+  String get paywallTerms => '약관';
+  @override
+  String get paywallSearchFree =>
+      '내 기억을 검색하는 건 언제나 무료예요. 이미 가진 것을 Premium이 잠그는 일은 없어요.';
+  @override
+  String get paywallNotWiredNote => '구매 기능은 스토어 버전에서 제공돼요.';
+
+  @override
   String get back => '뒤로';
   @override
   String get moreActions => '더보기';

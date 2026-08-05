@@ -319,6 +319,51 @@ class JaraStringsTr extends JaraStrings {
       'Bulut Zekâsı, sınırsız bağlantı ve öncelikli indeksleme.';
 
   @override
+  String get paywallTitle => 'İhtiyacın olduğunda daha fazlası';
+  @override
+  String get paywallSubtitle =>
+      'Premium, JARA’ya üç şey ekler. Arama olduğu gibi kalır.';
+  @override
+  String get paywallFeatCloudTitle => 'Bulut Zekâsı';
+  @override
+  String get paywallFeatCloudBody =>
+      'Bulutu sen seçtiğinde daha zengin yanıtlar. Sen açana kadar kapalı '
+      'kalır, karar hep sende.';
+  @override
+  String get paywallFeatConnectionsTitle => 'Sınırsız bağlantı';
+  @override
+  String get paywallFeatConnectionsBody =>
+      'Ücretsiz planda sınırlı sayıda kaynak bağlı kalır. Premium ile '
+      'kullandığın her hesabı bağla.';
+  @override
+  String get paywallFeatIndexingTitle => 'Öncelikli indeksleme';
+  @override
+  String get paywallFeatIndexingBody =>
+      'Yeni kayıtların önce aranabilir olur, büyük bir aktarım sürerken '
+      'bile.';
+  @override
+  String get paywallMonthly => 'Aylık';
+  @override
+  String get paywallYearly => 'Yıllık';
+  @override
+  String get paywallYearlyBadge => 'En avantajlı';
+  @override
+  String get paywallPriceNote =>
+      'Fiyat, ödeme adımında bölgenin para biriminde görünür.';
+  @override
+  String get paywallCta => 'Premium’a başla';
+  @override
+  String get paywallRestore => 'Satın alımları geri yükle';
+  @override
+  String get paywallTerms => 'Koşullar';
+  @override
+  String get paywallSearchFree =>
+      'Kendi hafızanda arama her zaman ücretsiz. Premium, zaten sende olanı '
+      'asla kilitlemez.';
+  @override
+  String get paywallNotWiredNote => 'Satın alma, mağaza sürümüyle geliyor.';
+
+  @override
   String get back => 'Geri';
   @override
   String get moreActions => 'Diğer işlemler';

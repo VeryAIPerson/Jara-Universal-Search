@@ -324,6 +324,48 @@ class JaraStringsHi extends JaraStrings {
       'क्लाउड इंटेलिजेंस, अनलिमिटेड कनेक्शन और प्राथमिकता वाली इंडेक्सिंग।';
 
   @override
+  String get paywallTitle => 'जब ज़रूरत हो, तब और ज़्यादा पहुँच';
+  @override
+  String get paywallSubtitle =>
+      'Premium, JARA में तीन चीज़ें जोड़ता है। खोज बिल्कुल वैसी ही रहती है।';
+  @override
+  String get paywallFeatCloudTitle => 'क्लाउड इंटेलिजेंस';
+  @override
+  String get paywallFeatCloudBody =>
+      'जब आप क्लाउड चुनें, तो और बेहतर जवाब। यह तब तक बंद रहता है जब तक '
+      'आप इसे चालू न करें, और फ़ैसला हमेशा आपका होता है।';
+  @override
+  String get paywallFeatConnectionsTitle => 'अनलिमिटेड कनेक्शन';
+  @override
+  String get paywallFeatConnectionsBody =>
+      'फ़्री प्लान में सीमित संख्या में स्रोत जुड़े रहते हैं। Premium के साथ अपना हर अकाउंट जोड़ें।';
+  @override
+  String get paywallFeatIndexingTitle => 'प्राथमिकता वाली इंडेक्सिंग';
+  @override
+  String get paywallFeatIndexingBody =>
+      'नई सेव की गई चीज़ें पहले खोजी जा सकती हैं, चाहे बड़ा इंपोर्ट चल रहा हो।';
+  @override
+  String get paywallMonthly => 'मासिक';
+  @override
+  String get paywallYearly => 'सालाना';
+  @override
+  String get paywallYearlyBadge => 'सबसे किफ़ायती';
+  @override
+  String get paywallPriceNote =>
+      'कीमत पेमेंट के समय, आपके क्षेत्र की मुद्रा में दिखती है।';
+  @override
+  String get paywallCta => 'Premium से शुरू करें';
+  @override
+  String get paywallRestore => 'खरीदारी बहाल करें';
+  @override
+  String get paywallTerms => 'शर्तें';
+  @override
+  String get paywallSearchFree =>
+      'अपनी मेमोरी में खोजना हमेशा फ़्री है। जो आपके पास पहले से है, Premium उसे कभी लॉक नहीं करता।';
+  @override
+  String get paywallNotWiredNote => 'खरीदारी स्टोर वाले वर्शन के साथ आएगी।';
+
+  @override
   String get back => 'वापस';
   @override
   String get moreActions => 'और विकल्प';

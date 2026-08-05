@@ -333,6 +333,55 @@ class JaraStringsFr extends JaraStrings {
       'prioritaire.';
 
   @override
+  String get paywallTitle => 'Plus de portée, quand vous en avez besoin';
+  @override
+  String get paywallSubtitle =>
+      'Premium ajoute trois choses à JARA. La recherche, elle, ne change '
+      'pas.';
+  @override
+  String get paywallFeatCloudTitle => 'Intelligence cloud';
+  @override
+  String get paywallFeatCloudBody =>
+      'Des réponses plus riches quand vous choisissez le cloud. Elle reste '
+      'désactivée jusqu’à ce que vous l’activiez, et le choix vous '
+      'appartient.';
+  @override
+  String get paywallFeatConnectionsTitle => 'Connexions illimitées';
+  @override
+  String get paywallFeatConnectionsBody =>
+      'La formule gratuite garde un nombre limité de sources connectées. '
+      'Premium connecte chaque compte que vous utilisez.';
+  @override
+  String get paywallFeatIndexingTitle => 'Indexation prioritaire';
+  @override
+  String get paywallFeatIndexingBody =>
+      'Vos nouveaux enregistrements deviennent consultables en premier, même '
+      'pendant un import volumineux.';
+  @override
+  String get paywallMonthly => 'Mensuel';
+  @override
+  String get paywallYearly => 'Annuel';
+  @override
+  String get paywallYearlyBadge => 'Meilleure offre';
+  @override
+  String get paywallPriceNote =>
+      'Le prix s’affiche au moment du paiement, dans la devise de votre '
+      'région.';
+  @override
+  String get paywallCta => 'Commencer avec Premium';
+  @override
+  String get paywallRestore => 'Restaurer les achats';
+  @override
+  String get paywallTerms => 'Conditions';
+  @override
+  String get paywallSearchFree =>
+      'La recherche dans votre propre mémoire est gratuite, toujours. '
+      'Premium ne verrouille jamais ce que vous avez déjà.';
+  @override
+  String get paywallNotWiredNote =>
+      'Les achats arriveront avec la version publiée sur les stores.';
+
+  @override
   String get back => 'Retour';
   @override
   String get moreActions => 'Plus d’actions';

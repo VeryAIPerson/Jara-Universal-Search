@@ -313,6 +313,42 @@ class JaraStringsZhHans extends JaraStrings {
   String get settingsPremiumBody => '云端智能、无限连接数与优先索引处理。';
 
   @override
+  String get paywallTitle => '需要时，走得更远';
+  @override
+  String get paywallSubtitle => 'Premium 为 JARA 增加三项能力，搜索保持原样。';
+  @override
+  String get paywallFeatCloudTitle => '云端智能';
+  @override
+  String get paywallFeatCloudBody => '当你选择云端时，回答会更完整。在你开启之前它始终关闭，选择权一直在你手中。';
+  @override
+  String get paywallFeatConnectionsTitle => '无限连接数';
+  @override
+  String get paywallFeatConnectionsBody =>
+      '免费方案可连接的来源数量有限，Premium 可连接你使用的每一个账户。';
+  @override
+  String get paywallFeatIndexingTitle => '优先索引处理';
+  @override
+  String get paywallFeatIndexingBody => '新保存的内容会优先变得可搜索，即使正在进行大量导入。';
+  @override
+  String get paywallMonthly => '按月';
+  @override
+  String get paywallYearly => '按年';
+  @override
+  String get paywallYearlyBadge => '最超值';
+  @override
+  String get paywallPriceNote => '价格会在结账时按你所在地区的货币显示。';
+  @override
+  String get paywallCta => '开始使用 Premium';
+  @override
+  String get paywallRestore => '恢复购买';
+  @override
+  String get paywallTerms => '条款';
+  @override
+  String get paywallSearchFree => '搜索你自己的记忆永远免费，Premium 从不锁住你已经拥有的内容。';
+  @override
+  String get paywallNotWiredNote => '购买功能将随商店版本推出。';
+
+  @override
   String get back => '返回';
   @override
   String get moreActions => '更多操作';

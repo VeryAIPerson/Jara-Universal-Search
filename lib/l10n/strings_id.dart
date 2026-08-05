@@ -319,6 +319,51 @@ class JaraStringsId extends JaraStrings {
       'Kecerdasan Cloud, koneksi tanpa batas, dan pengindeksan prioritas.';
 
   @override
+  String get paywallTitle => 'Jangkauan lebih luas saat kamu butuh';
+  @override
+  String get paywallSubtitle =>
+      'Premium menambahkan tiga hal ke JARA. Pencarian tetap sama persis.';
+  @override
+  String get paywallFeatCloudTitle => 'Kecerdasan Cloud';
+  @override
+  String get paywallFeatCloudBody =>
+      'Jawaban yang lebih kaya saat kamu memilih cloud. Fiturnya mati sampai '
+      'kamu menyalakannya, dan keputusannya selalu milikmu.';
+  @override
+  String get paywallFeatConnectionsTitle => 'Koneksi tanpa batas';
+  @override
+  String get paywallFeatConnectionsBody =>
+      'Paket gratis menjaga sejumlah sumber tetap terhubung. Premium '
+      'menghubungkan setiap akun yang kamu pakai.';
+  @override
+  String get paywallFeatIndexingTitle => 'Pengindeksan prioritas';
+  @override
+  String get paywallFeatIndexingBody =>
+      'Simpanan baru bisa dicari lebih dulu, bahkan saat impor besar masih '
+      'berjalan.';
+  @override
+  String get paywallMonthly => 'Bulanan';
+  @override
+  String get paywallYearly => 'Tahunan';
+  @override
+  String get paywallYearlyBadge => 'Paling hemat';
+  @override
+  String get paywallPriceNote =>
+      'Harga muncul saat pembayaran, dalam mata uang wilayahmu.';
+  @override
+  String get paywallCta => 'Mulai dengan Premium';
+  @override
+  String get paywallRestore => 'Pulihkan pembelian';
+  @override
+  String get paywallTerms => 'Ketentuan';
+  @override
+  String get paywallSearchFree =>
+      'Mencari di memorimu sendiri selalu gratis. Premium tidak pernah '
+      'mengunci apa yang sudah kamu punya.';
+  @override
+  String get paywallNotWiredNote => 'Pembelian hadir bersama versi toko.';
+
+  @override
   String get back => 'Kembali';
   @override
   String get moreActions => 'Aksi lainnya';

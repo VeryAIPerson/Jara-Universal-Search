@@ -403,6 +403,46 @@ class JaraStringsAr extends JaraStrings {
       'ذكاء السحابة واتصالات غير محدودة وفهرسة ذات أولوية.';
 
   @override
+  String get paywallTitle => 'وصول أوسع، عندما تحتاج إليه';
+  @override
+  String get paywallSubtitle =>
+      'يضيف Premium ثلاثة أشياء إلى JARA. أما البحث فيبقى كما هو تمامًا.';
+  @override
+  String get paywallFeatCloudTitle => 'ذكاء السحابة';
+  @override
+  String get paywallFeatCloudBody =>
+      'إجابات أغنى عندما تختار السحابة. يبقى معطّلًا حتى تشغّله بنفسك، والقرار يبقى لك دائمًا.';
+  @override
+  String get paywallFeatConnectionsTitle => 'اتصالات غير محدودة';
+  @override
+  String get paywallFeatConnectionsBody =>
+      'تُبقي الخطة المجانية عددًا محدودًا من المصادر متصلة. أما Premium فيربط كل حساب تستخدمه.';
+  @override
+  String get paywallFeatIndexingTitle => 'فهرسة ذات أولوية';
+  @override
+  String get paywallFeatIndexingBody =>
+      'تصبح العناصر الجديدة قابلة للبحث أولًا، حتى أثناء استيراد كبير.';
+  @override
+  String get paywallMonthly => 'شهريًا';
+  @override
+  String get paywallYearly => 'سنويًا';
+  @override
+  String get paywallYearlyBadge => 'أفضل قيمة';
+  @override
+  String get paywallPriceNote => 'يظهر السعر عند الدفع، بعملة منطقتك.';
+  @override
+  String get paywallCta => 'ابدأ مع Premium';
+  @override
+  String get paywallRestore => 'استعادة المشتريات';
+  @override
+  String get paywallTerms => 'الشروط';
+  @override
+  String get paywallSearchFree =>
+      'البحث في ذاكرتك الخاصة مجاني دائمًا. لا يقفل Premium أبدًا ما لديك بالفعل.';
+  @override
+  String get paywallNotWiredNote => 'ستصل المشتريات مع نسخة المتجر.';
+
+  @override
   String get back => 'رجوع';
   @override
   String get moreActions => 'إجراءات أخرى';

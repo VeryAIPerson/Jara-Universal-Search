@@ -63,6 +63,12 @@ void main() {
         s.emptyResultsTitle, s.emptyMemoryTitle, s.offlineLabel,
         s.back, s.done, s.apply, s.continueCta, s.searchAction,
         s.needsConnection, s.today, s.tomorrow, s.yesterday,
+        s.paywallTitle, s.paywallSubtitle, s.paywallFeatCloudTitle,
+        s.paywallFeatCloudBody, s.paywallFeatConnectionsTitle,
+        s.paywallFeatConnectionsBody, s.paywallFeatIndexingTitle,
+        s.paywallFeatIndexingBody, s.paywallMonthly, s.paywallYearly,
+        s.paywallYearlyBadge, s.paywallCta, s.paywallRestore,
+        s.paywallTerms, s.paywallNotWiredNote,
       ];
       for (final value in samples) {
         expect(value.trim(), isNotEmpty, reason: '$tag has an empty string');
@@ -131,10 +137,37 @@ void main() {
           allOf(contains('Face ID'), contains('Touch ID')));
     });
 
+    test('$tag — the paywall promises without inventing a price', () {
+      // D9's trust sentence and the "where the price comes from" caption
+      // are the two lines the screen cannot ship without.
+      expect(s.paywallSearchFree.trim(), isNotEmpty,
+          reason: '$tag drops the search-stays-free promise');
+      expect(s.paywallPriceNote.trim(), isNotEmpty,
+          reason: '$tag drops the pricing note');
+      // Feature names are translated (D24), but each deck must say
+      // "Cloud Intelligence" the one way it already says it in Privacy.
+      expect(s.paywallFeatCloudTitle, s.privacyCloudAi,
+          reason: '$tag renames Cloud Intelligence on the paywall');
+      // Store pricing is unset, so no deck may put a figure or a currency
+      // sign in the plan, price-note or CTA copy — the screen renders an
+      // em-dash and defers to checkout.
+      for (final value in [
+        s.paywallMonthly, s.paywallYearly, s.paywallYearlyBadge,
+        s.paywallPriceNote, s.paywallCta,
+      ]) {
+        expect(value, isNot(matches(RegExp(r'[0-9٠-٩۰-۹]'))),
+            reason: '$tag renders a price figure');
+        expect(value, isNot(matches(RegExp(r'[\$€£₺₹¥₩₫฿]'))),
+            reason: '$tag renders a currency sign');
+      }
+    });
+
     test('$tag — no forbidden technical vocabulary', () {
       final surface = [
         s.privacyOnDeviceBody, s.privacyCloudBody, s.settingsPremiumBody,
         s.onb2Body, s.emptyMemoryBody, s.offlineBody,
+        s.paywallFeatCloudBody, s.paywallFeatConnectionsBody,
+        s.paywallFeatIndexingBody, s.paywallSearchFree,
         for (final e in JaraError.values) s.errorBody(e),
       ].join(' ').toLowerCase();
       for (final banned in ['embedding', 'vector database', ' rag ']) {

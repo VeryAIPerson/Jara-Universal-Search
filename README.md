@@ -43,7 +43,7 @@ sorgularını dene).
 
 ## Kalite kapıları
 
-`flutter analyze` temiz · **144 test**: davranış + 124 dil-parite testi
+`flutter analyze` temiz · **138 test**: davranış + 124 dil-parite testi
 (20 dil, çoğul/interpolasyon/marka korunumu) + 8 golden (4 imza ekran ×
 2 tema, sabitlenmiş saat, Linux-raster — CI Flutter sürümü sabit) ·
 Reduce Motion + Semantics denetimi. Saat kabuğu: `flutter run -t

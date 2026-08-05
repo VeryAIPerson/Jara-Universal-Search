@@ -102,18 +102,24 @@ mobil uygulama pazarı büyüklüğü + mevcut site paritesi ile yapıldı:
 **İki RTL dili var** (`ar`, `fa`) — bu yalnız metin yönü değil, düzen aynalaması demektir:
 S-kavis asimetrik (sol 44, sağ 86) ve RTL'de aynalanmalı; tüm `EdgeInsets` yönlü hale gelmeli.
 
-### Teknik geçiş (D20)
+### Teknik yaklaşım (D20b — D20'yi geri aldı)
 
-Mevcut tipli Dart deck 2 dil için doğru karardı (D6) ve o karar zaten geçiş eşiğini yazmıştı:
-**3+ dilde ARB'ye taşınır.** 20 dil o eşiği net aşıyor.
+İlk karar ARB + gen-l10n'e geçmekti; uygulamada tersine çevrildi. 20 dilde asıl
+risk **eksik anahtar**: ARB'de eksik anahtar sessizce şablon dile düşer; tipli
+deck'te **derleme hatasıdır** — 20 dilde parite ancak böyle garanti edilir.
 
-- `lib/l10n/app_en.arb` … ×20 + `flutter gen-l10n` (`AppLocalizations`).
-- `l10n.yaml` + `pubspec` `generate: true`.
-- Anahtar sayısı ~200 → 20 dil = ~4.000 dize. Diller ajanlara bölünerek çevrilir.
-- **Kalite notu:** çeviriler yayına hazır kalitede üretilir ama **store lansmanından önce
-  ana dil konuşuru gözden geçirmesi** önerilir; özellikle `ar/fa/hi/th` tipografi ve ton.
-- Çoğul/cinsiyet: ICU `plural` sözdizimi kullanılır (`{count, plural, ...}`) — "3 items" gibi
-  yerlerde İngilizce'ye özgü kurallar gömülü kalmaz.
+- Dil başına bir sınıf: `lib/l10n/strings_XX.dart` (173 üye × 20 dil).
+- Kayıt: `lib/l10n/locales.dart` — locale + deck + endonim; çözümleme dil
+  etiketine düşer (`pt-PT` → pt-BR deck'i, `zh-Hant-HK` → zh-Hant), sonra EN.
+- Çoğullar dil sınıfının içinde gerçek mantıkla: ru/pl üç form (11–14
+  istisnasıyla), Arapça altı form (CLDR'ye karşı n=0..4999 diff'lendi),
+  CJK sayaç kelimeleri (条/筆/件/개).
+- 124 parite testi derleyicinin göremediğini tutar: boş dize, kaybolan
+  interpolasyon, çevrilen marka adı, sızan teknik terim.
+- ARB yalnız **dışa aktarım** formatı olarak üretilir (çeviri ajansına),
+  kaynak değil.
+- **Kalite notu (D21):** store lansmanından önce ana dil gözden geçirmesi
+  önerilir; özellikle `ar/fa/hi/th` tipografi ve ton.
 
 ---
 
@@ -134,7 +140,7 @@ Mevcut tipli Dart deck 2 dil için doğru karardı (D6) ve o karar zaten geçiş
    product flavour (D22)
 6. ⏳ v1.1: Apple Watch SwiftUI companion (D18)
 
-Doğrulama kanıtı: `flutter analyze` temiz · 144 test (8 golden dahil,
+Doğrulama kanıtı: `flutter analyze` temiz · 138 test (8 golden dahil,
 Linux-raster, CI Flutter 3.44.8'e sabit) · görsel turlar: 390 koyu+açık,
 834 ray+dikey Horizon, 1440 kenar çubuğu+iki pano, 390/834 Arapça RTL,
 gerçek tarayıcıda 1440 (0 sayfa hatası).

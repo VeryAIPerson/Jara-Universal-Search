@@ -117,10 +117,7 @@ class PrivacyPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.jara;
     final color = active ? t.success : t.textOnSkyTertiary;
-    return Pressable(
-      onTap: onTap,
-      semanticLabel: label,
-      child: Container(
+    final pill = Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),
@@ -139,7 +136,8 @@ class PrivacyPill extends StatelessWidget {
             Text(label, style: JaraType.caption.copyWith(color: color)),
           ],
         ),
-      ),
-    );
+      );
+    if (onTap == null) return Semantics(label: label, child: pill);
+    return Pressable(onTap: onTap, semanticLabel: label, child: pill);
   }
 }

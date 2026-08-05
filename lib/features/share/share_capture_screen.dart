@@ -23,8 +23,7 @@ class ShareCaptureScreen extends ConsumerStatefulWidget {
   const ShareCaptureScreen({super.key});
 
   @override
-  ConsumerState<ShareCaptureScreen> createState() =>
-      _ShareCaptureScreenState();
+  ConsumerState<ShareCaptureScreen> createState() => _ShareCaptureScreenState();
 }
 
 class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {

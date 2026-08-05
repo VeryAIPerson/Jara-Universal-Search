@@ -34,31 +34,6 @@ double _skyInset(WindowClass w) => w.isPhone
     ? JaraBreakpoints.pageInsetFor(w)
     : JaraSpacing.page;
 
-/// Query tools cap out — a search field and a filter row stretched across
-/// a monitor read as a toolbar, not as a query. Phones stay untouched.
-Widget _queryColumn(WindowClass w, Widget child) => w.isPhone
-    ? child
-    : Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: ConstrainedBox(
-          constraints:
-              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
-          child: child,
-        ),
-      );
-
-/// Wide monitors gain margin, not longer rows.
-Widget _pageColumn(WindowClass w, Widget child) =>
-    w == WindowClass.large
-        ? Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                  maxWidth: JaraBreakpoints.contentMaxWidth),
-              child: child,
-            ),
-          )
-        : child;
-
 /// Result cards read better side by side than as one very wide column —
 /// but only while each card keeps a scannable width.
 Widget _cardGrid(List<Widget> cards, int columns) {
@@ -186,91 +161,88 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
           _skyInset(w), JaraSpacing.sm, _skyInset(w), 96),
       surfacePadding: EdgeInsets.fromLTRB(
           inset, JaraSpacing.huge, inset, _bottomRoom(w)),
-      sky: _queryColumn(
-        w,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            OfflineSlot(offline: offline, label: s.offlineLabel),
-            Row(
-              children: [
-                NeuIconButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  onSky: true,
-                  semanticLabel: s.back,
-                  onTap: () => context.pop(),
-                ),
-                const SizedBox(width: JaraSpacing.md),
-                Expanded(
-                  child: JaraSearchField(
-                    controller: _controller,
-                    hints: const [],
-                    onSubmitted: _submit,
-                    onVoiceTap: _startVoiceSearch,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            FilterChipRow(
-              selected: ref.watch(activeFilterProvider),
-              onSelected: (type) =>
-                  ref.read(activeFilterProvider.notifier).state = type,
-              allLabel: s.filterAll,
-              labelOf: s.typeLabel,
-            ),
-            const SizedBox(height: JaraSpacing.md),
-            SizedBox(
-              height: 16,
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: loading || outcome == null
-                    ? const SkeletonLine(width: 140, height: 10)
-                    : Text(
-                        s.resultsCount(
-                          outcome.items.length,
-                          '${(outcome.elapsed.inMilliseconds / 1000).toStringAsFixed(1)} s',
-                        ),
-                        style:
-                            JaraType.caption.copyWith(color: t.textOnSkyTertiary),
-                      ),
+      sky: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          OfflineSlot(offline: offline, label: s.offlineLabel),
+          Row(
+            children: [
+              NeuIconButton(
+                icon: Icons.arrow_back_ios_new_rounded,
+                onSky: true,
+                semanticLabel: s.back,
+                onTap: () => context.pop(),
               ),
-            ),
-            // The answer is the one cloud-bound block here; local results
-            // below keep rendering either way.
-            if (offline && answerable) ...[
-              const SizedBox(height: JaraSpacing.lg),
-              _SummaryUnavailable(
-                title: s.smartSummaryTitle,
-                caption: s.needsConnection,
-              ),
-            ]
-            // Only promise an answer if the last outcome actually had one.
-            else if (summary != null) ...[
-              const SizedBox(height: JaraSpacing.lg),
-              if (loading)
-                const SmartSummarySkeleton()
-              else
-                SmartSummaryCard(
-                  summary: summary,
-                  titleLabel: s.smartSummaryTitle,
-                  basedOnLabel: s.basedOnItems(summary.sourceCount),
-                  viewSourcesLabel: s.viewSources,
-                  onViewSources: _scrollToResults,
-                  onCopy: () {
-                    Clipboard.setData(ClipboardData(text: summary.text));
-                    _notify(s.copied);
-                  },
-                  onSave: () {
-                    JaraHaptics.confirm();
-                    _notify(s.shareSaved);
-                  },
+              const SizedBox(width: JaraSpacing.md),
+              Expanded(
+                child: JaraSearchField(
+                  controller: _controller,
+                  hints: const [],
+                  onSubmitted: _submit,
+                  onVoiceTap: _startVoiceSearch,
                 ),
+              ),
             ],
+          ),
+          const SizedBox(height: 14),
+          FilterChipRow(
+            selected: ref.watch(activeFilterProvider),
+            onSelected: (type) =>
+                ref.read(activeFilterProvider.notifier).state = type,
+            allLabel: s.filterAll,
+            labelOf: s.typeLabel,
+          ),
+          const SizedBox(height: JaraSpacing.md),
+          SizedBox(
+            height: 16,
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: loading || outcome == null
+                  ? const SkeletonLine(width: 140, height: 10)
+                  : Text(
+                      s.resultsCount(
+                        outcome.items.length,
+                        '${(outcome.elapsed.inMilliseconds / 1000).toStringAsFixed(1)} s',
+                      ),
+                      style:
+                          JaraType.caption.copyWith(color: t.textOnSkyTertiary),
+                    ),
+            ),
+          ),
+          // The answer is the one cloud-bound block here; local results
+          // below keep rendering either way.
+          if (offline && answerable) ...[
+            const SizedBox(height: JaraSpacing.lg),
+            _SummaryUnavailable(
+              title: s.smartSummaryTitle,
+              caption: s.needsConnection,
+            ),
+          ]
+          // Only promise an answer if the last outcome actually had one.
+          else if (summary != null) ...[
+            const SizedBox(height: JaraSpacing.lg),
+            if (loading)
+              const SmartSummarySkeleton()
+            else
+              SmartSummaryCard(
+                summary: summary,
+                titleLabel: s.smartSummaryTitle,
+                basedOnLabel: s.basedOnItems(summary.sourceCount),
+                viewSourcesLabel: s.viewSources,
+                onViewSources: _scrollToResults,
+                onCopy: () {
+                  Clipboard.setData(ClipboardData(text: summary.text));
+                  _notify(s.copied);
+                },
+                onSave: () {
+                  JaraHaptics.confirm();
+                  _notify(s.shareSaved);
+                },
+              ),
           ],
-        ),
+        ],
       ),
-      surface: _pageColumn(w, _surface(context, s, results)),
+      surface: _surface(context, s, results),
     );
   }
 

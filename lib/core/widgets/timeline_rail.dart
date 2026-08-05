@@ -73,6 +73,9 @@ class TimelineRail extends StatelessWidget {
     if (w.isPhone || w.isWatch || days.isEmpty) return rail;
     return Align(
       alignment: AlignmentDirectional.centerStart,
+      // Shrink-wrap vertically so the wrapper cannot grow the rail past
+      // its own height in a bounded parent.
+      heightFactor: 1,
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: days.length * (_maxColumnWidth + _gap),

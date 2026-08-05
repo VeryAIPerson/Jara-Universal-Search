@@ -14,18 +14,6 @@ import '../../core/widgets/jara_search_field.dart';
 import '../../core/widgets/neu_card.dart';
 import '../../core/widgets/state_views.dart';
 
-/// Query block cap: a search field the width of a monitor is a bug.
-Widget _queryColumn(WindowClass w, Widget child) => w.isPhone
-    ? child
-    : Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: ConstrainedBox(
-          constraints:
-              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
-          child: child,
-        ),
-      );
-
 /// Collections tab — sky holds the title and a shortcut back into search,
 /// the surface holds the collection grid.
 class CollectionsScreen extends ConsumerWidget {
@@ -82,29 +70,26 @@ class CollectionsScreen extends ConsumerWidget {
           96),
       surfacePadding: EdgeInsets.fromLTRB(inset, JaraSpacing.lg, inset,
           w.usesRail ? JaraSpacing.xxxl : 130),
-      sky: _queryColumn(
-        w,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              s.collectionsTitle,
-              style: JaraType.title1.copyWith(color: t.textOnSky),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              s.collectionItems(totalItems),
-              style: JaraType.caption.copyWith(color: t.textOnSkySecondary),
-            ),
-            const SizedBox(height: JaraSpacing.lg),
-            JaraSearchField(
-              readOnly: true,
-              hero: false,
-              hints: [s.searchHints.first],
-              onTap: () => context.go('/search'),
-            ),
-          ],
-        ),
+      sky: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            s.collectionsTitle,
+            style: JaraType.title1.copyWith(color: t.textOnSky),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            s.collectionItems(totalItems),
+            style: JaraType.caption.copyWith(color: t.textOnSkySecondary),
+          ),
+          const SizedBox(height: JaraSpacing.lg),
+          JaraSearchField(
+            readOnly: true,
+            hero: false,
+            hints: [s.searchHints.first],
+            onTap: () => context.go('/search'),
+          ),
+        ],
       ),
       // Collections run one column behind the source tiles (2/3/4/5): the
       // card is twice a tile's content, so it needs twice its width.

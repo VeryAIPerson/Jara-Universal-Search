@@ -18,6 +18,11 @@ namespace {
 
 constexpr const wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
 
+// JaraBreakpoints.desktopMinimum, in logical pixels — below this the app
+// falls back to the phone layout, so the window must not shrink past it.
+constexpr int kMinimumWindowWidth = 420;
+constexpr int kMinimumWindowHeight = 640;
+
 /// Registry key for app theme preference.
 ///
 /// A value of 0 indicates apps should use dark mode. A non-zero or missing
@@ -204,6 +209,14 @@ Win32Window::MessageHandler(HWND hwnd,
         MoveWindow(child_content_, rect.left, rect.top, rect.right - rect.left,
                    rect.bottom - rect.top, TRUE);
       }
+      return 0;
+    }
+
+    case WM_GETMINMAXINFO: {
+      auto* info = reinterpret_cast<MINMAXINFO*>(lparam);
+      double scale_factor = FlutterDesktopGetDpiForHWND(hwnd) / 96.0;
+      info->ptMinTrackSize.x = Scale(kMinimumWindowWidth, scale_factor);
+      info->ptMinTrackSize.y = Scale(kMinimumWindowHeight, scale_factor);
       return 0;
     }
 

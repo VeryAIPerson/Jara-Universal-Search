@@ -144,6 +144,8 @@ class AdaptiveNavShell extends StatelessWidget {
             maxWidth: JaraBreakpoints.contentMaxWidth,
           ),
           child: Row(
+            // Stretch so the rail panel and the panes run full height.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _NavRail(
                 destinations: destinations,
@@ -166,6 +168,7 @@ class AdaptiveNavShell extends StatelessWidget {
 
   Widget _panes(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(flex: 5, child: body),
         Container(width: 1, color: context.jara.border),

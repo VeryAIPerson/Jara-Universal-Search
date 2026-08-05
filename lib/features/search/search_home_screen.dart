@@ -43,31 +43,6 @@ double _skyInset(WindowClass w) => w.isPhone
     ? JaraBreakpoints.pageInsetFor(w)
     : JaraSpacing.page;
 
-/// Query block cap: a search field 1300 dp wide is a bug, not a feature.
-/// Untouched on phones so the signed-off layout stays byte-identical.
-Widget _queryColumn(WindowClass w, Widget child) => w.isPhone
-    ? child
-    : Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: ConstrainedBox(
-          constraints:
-              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
-          child: child,
-        ),
-      );
-
-/// Wide monitors gain margin, not longer rows.
-Widget _pageColumn(WindowClass w, Widget child) =>
-    w == WindowClass.large
-        ? Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                  maxWidth: JaraBreakpoints.contentMaxWidth),
-              child: child,
-            ),
-          )
-        : child;
-
 /// Result cards read better side by side than as one very wide column —
 /// but only while each card keeps a scannable width.
 Widget _cardGrid(List<Widget> cards, int columns) {
@@ -191,72 +166,61 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
             avatarInitials: 'A',
             onAvatarTap: () => context.go('/profile'),
           ),
-          _queryColumn(
-            w,
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: JaraSpacing.md),
-                _GreetingRow(
-                  greeting: _greeting(s),
-                  pillLabel: s.privacyLocalActive,
-                  stacked: !w.isPhone,
-                  onPillTap: () => context.push('/profile/privacy'),
-                ),
-                const SizedBox(height: JaraSpacing.lg),
-                Text(
-                  s.searchTitle,
-                  style: JaraType.display.copyWith(color: t.textOnSky),
-                ),
-                const SizedBox(height: JaraSpacing.xl),
-                JaraSearchField(
-                  controller: _controller,
-                  hints: s.searchHints,
-                  onChanged: (value) => setState(() => _typed = value),
-                  onSubmitted: (value) => _runSearch(value),
-                  onVoiceTap: _startVoiceSearch,
-                  onFilterTap: () => showSearchFilterSheet(context),
-                ),
-                if (prefix.isEmpty) ...[
-                  const SizedBox(height: JaraSpacing.xl),
-                  MemoryStatusCard(
-                    stats: stats,
-                    title: s.memoryStatusTitle,
-                    itemsLabel: s.memoryStatusItems(
-                        stats.totalItems, stats.collections),
-                    freeLabel: stats.storageFreeLabel,
-                    lastIndexedLabel:
-                        s.indexedAgo(relativeDate(s, stats.lastIndexed)),
-                    onTap: () => context.go('/memory'),
-                  ),
-                ] else ...[
-                  const SizedBox(height: JaraSpacing.md),
-                  _Suggestions(prefix: prefix, onPick: _runSearch),
-                ],
-              ],
-            ),
+          const SizedBox(height: JaraSpacing.md),
+          _GreetingRow(
+            greeting: _greeting(s),
+            pillLabel: s.privacyLocalActive,
+            stacked: !w.isPhone,
+            onPillTap: () => context.push('/profile/privacy'),
           ),
+          const SizedBox(height: JaraSpacing.lg),
+          Text(
+            s.searchTitle,
+            style: JaraType.display.copyWith(color: t.textOnSky),
+          ),
+          const SizedBox(height: JaraSpacing.xl),
+          JaraSearchField(
+            controller: _controller,
+            hints: s.searchHints,
+            onChanged: (value) => setState(() => _typed = value),
+            onSubmitted: (value) => _runSearch(value),
+            onVoiceTap: _startVoiceSearch,
+            onFilterTap: () => showSearchFilterSheet(context),
+          ),
+          if (prefix.isEmpty) ...[
+            const SizedBox(height: JaraSpacing.xl),
+            MemoryStatusCard(
+              stats: stats,
+              title: s.memoryStatusTitle,
+              itemsLabel:
+                  s.memoryStatusItems(stats.totalItems, stats.collections),
+              freeLabel: stats.storageFreeLabel,
+              lastIndexedLabel:
+                  s.indexedAgo(relativeDate(s, stats.lastIndexed)),
+              onTap: () => context.go('/memory'),
+            ),
+          ] else ...[
+            const SizedBox(height: JaraSpacing.md),
+            _Suggestions(prefix: prefix, onPick: _runSearch),
+          ],
         ],
       ),
-      surface: _pageColumn(
-        w,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SectionHeader(title: s.sourcesSection),
-            _SourceGrid(onSelect: _browseType),
-            const SizedBox(height: JaraSpacing.xxl),
-            SectionHeader(title: s.recentSearches),
-            _RecentSearches(onPick: _runSearch),
-            const SizedBox(height: JaraSpacing.xxl),
-            SectionHeader(
-              title: s.recentlySaved,
-              actionLabel: s.seeAll,
-              onAction: () => context.go('/memory'),
-            ),
-            const _RecentlySaved(),
-          ],
-        ),
+      surface: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionHeader(title: s.sourcesSection),
+          _SourceGrid(onSelect: _browseType),
+          const SizedBox(height: JaraSpacing.xxl),
+          SectionHeader(title: s.recentSearches),
+          _RecentSearches(onPick: _runSearch),
+          const SizedBox(height: JaraSpacing.xxl),
+          SectionHeader(
+            title: s.recentlySaved,
+            actionLabel: s.seeAll,
+            onAction: () => context.go('/memory'),
+          ),
+          const _RecentlySaved(),
+        ],
       ),
     );
   }

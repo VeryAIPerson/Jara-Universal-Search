@@ -159,7 +159,16 @@ class JaraChip extends StatelessWidget {
             Icon(icon, size: 12, color: c),
             const SizedBox(width: 4),
           ],
-          Text(label, style: JaraType.caption.copyWith(color: c)),
+          // Inert when the chip is unbounded (Wrap, Row without flex);
+          // only bites when a parent hands it a tight width.
+          Flexible(
+            child: Text(
+              label,
+              style: JaraType.caption.copyWith(color: c),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

@@ -8,6 +8,11 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
+    self.title = "JARA Universal Search"
+    // JaraBreakpoints.desktopMinimum — below this the app falls back to
+    // the phone layout, so the window must not shrink past it.
+    self.contentMinSize = NSSize(width: 420, height: 640)
+
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()

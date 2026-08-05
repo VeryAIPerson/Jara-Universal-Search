@@ -18,18 +18,6 @@ import '../../core/widgets/state_views.dart';
 import '../../core/widgets/timeline_rail.dart';
 import '../add/add_sheet.dart';
 
-/// Wide monitors gain margin, not longer rows.
-Widget _pageColumn(WindowClass w, Widget child) =>
-    w == WindowClass.large
-        ? Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                  maxWidth: JaraBreakpoints.contentMaxWidth),
-              child: child,
-            ),
-          )
-        : child;
-
 /// The three stat cards are a compact dashboard strip, not a banner: past
 /// this they stop carrying more information and only get emptier.
 Widget _statStrip(WindowClass w, Widget child) => w.isPhone
@@ -295,8 +283,8 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
           w.usesRail ? JaraSpacing.huge : 140),
       surfacePadding:
           EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset, 0),
-      sky: _pageColumn(w, sky),
-      surface: _pageColumn(w, surface),
+      sky: sky,
+      surface: surface,
     );
   }
 }

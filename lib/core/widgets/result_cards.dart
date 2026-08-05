@@ -102,7 +102,11 @@ class UniversalResultCard extends StatelessWidget {
           children: [
             Icon(item.type.icon, size: 12, color: tertiary),
             const SizedBox(width: 4),
-            Flexible(
+            // Expanded rather than Flexible + Spacer: the text is start
+            // aligned inside its box, so a short line still leaves the
+            // chip at the end — but a long match reason can now take
+            // room from the metadata instead of overflowing the row.
+            Expanded(
               child: Text(
                 [
                   item.source,
@@ -115,9 +119,12 @@ class UniversalResultCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Spacer(),
-            if (item.matchReason != null)
-              JaraChip(label: item.matchReason!, color: t.violet),
+            if (item.matchReason != null) ...[
+              const SizedBox(width: 8),
+              Flexible(
+                child: JaraChip(label: item.matchReason!, color: t.violet),
+              ),
+            ],
           ],
         ),
       ],

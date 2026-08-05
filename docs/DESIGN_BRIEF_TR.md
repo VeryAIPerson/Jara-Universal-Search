@@ -106,3 +106,23 @@ Kısa, sakin, birinci tekil sahiplik ("your memory"). Teknik AI terimleri yasak:
 
 **MVP (bu repo):** Splash, Onboarding, Search home/Suggestions/Results, Smart Summary (mock akıl), Result Detail, Add (mock analiz), Share Capture ekranı, Memory, Collections, Connections, Privacy, Settings; EN/TR; koyu+açık tema; mock local-first veri.
 **v1.1:** gerçek on-device index (Isar + OCR/STT), Share Extension/intent kablolama, gerçek STT sesli arama, Cloud Intelligence (opt-in) + Premium paywall, Spotlight/Shortcuts donation, telemetri kararı, tablet düzeni.
+
+### 16.1 Cila turu (2026-08-05) — denetimde bulunan ve kapatılan boşluklar
+
+İlk teslimden sonra yapılan doğrulama turu 11 gerçek boşluk buldu (spekülasyon değil; kod taraması + açık tema görsel doğrulaması ile). Hepsi kapatıldı:
+
+| Bulgu | Neydi | Karar |
+|---|---|---|
+| Çevrimdışı modu ölü | `OfflineBanner`+`offlineProvider` 0 ekranda kullanılıyordu; §16 vaadi karşılıksızdı | `connectivity_plus` ile gerçek bağlantı durumu; iki arama ekranında banner; bulut-özel yüzeyler işaretli (D13) |
+| FAB indeksleme morph'u ölü | `JaraFabState.indexing/success` hiç tetiklenmiyordu; "Re-index" sessizdi | Shell `indexStateProvider`'ı dinler; başarıda kısa altın halka |
+| Onboarding her açılışta | Kalıcılık katmanı yoktu | `shared_preferences` + `prefs.dart`; splash dallanır (D13) |
+| TR paritesi eksik | 14 benzersiz İngilizce literal (26 kullanım) deck dışındaydı | Hepsi tipli deck'e taşındı; parite derleyici garantili |
+| Hata durumları | 9 senaryodan yalnız 1'i vardı | `JaraError` kataloğu + `ErrorStateView` (D14) |
+| Dokunma hedefleri | Pin ikonu, `NeuIconButton(38)`, `JaraChip` 44pt altındaydı | Görünmez hit-box ≥44, görsel boyut sabit (D15) |
+| Dynamic Type | Hiç test edilmemişti | 1.3×/1.5× denetimi + taşma düzeltmeleri |
+| Golden test | Yoktu (§15 kapısı) | 4 imza ekran × 2 tema (D16) |
+| Profile segment çipleri | Tam genişlik yığılıyordu | Kompakt segment satırı |
+| Gelecek tarih metni | `"in 5 d"` garip okunuyordu | `Tomorrow` / `in 5 days` / `5 gün sonra` |
+| Kimlik kartı | E-posta kırpılıyordu | Satır dengesi yeniden kuruldu |
+
+**Açık tema ilk kez görsel doğrulandı** (koyu tema teslimde doğrulanmıştı): neumorfik yüzeyler, ters Horizon ve alt bar referansa sadık.

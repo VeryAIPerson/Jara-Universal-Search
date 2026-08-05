@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,9 +17,11 @@ import '../../features/search/search_results_screen.dart';
 import '../../features/settings/profile_screen.dart';
 import '../../features/share/share_capture_screen.dart';
 import '../../features/splash/splash_screen.dart';
+import '../data/providers.dart';
 import '../design/jara_theme.dart';
 import '../l10n_bridge.dart';
 import '../widgets/jara_bottom_bar.dart';
+import '../widgets/jara_fab.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -106,14 +110,54 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 });
 
 /// App shell: indexed branches over a floating bottom bar + center FAB.
-class JaraShell extends ConsumerWidget {
+class JaraShell extends ConsumerStatefulWidget {
   const JaraShell({super.key, required this.shell});
 
   final StatefulNavigationShell shell;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<JaraShell> createState() => _JaraShellState();
+}
+
+class _JaraShellState extends ConsumerState<JaraShell> {
+  /// Long enough to register as "done", short enough not to sit in the way
+  /// of the add action the FAB normally offers.
+  static const _successFlash = Duration(milliseconds: 900);
+
+  JaraFabState _fabState = JaraFabState.add;
+  Timer? _flash;
+
+  @override
+  void dispose() {
+    _flash?.cancel();
+    super.dispose();
+  }
+
+  void _onIndexState(IndexState? previous, IndexState next) {
+    _flash?.cancel();
+    if (next == IndexState.indexing) {
+      setState(() => _fabState = JaraFabState.indexing);
+      return;
+    }
+    // Only a finished run earns the check — landing on idle any other way
+    // (first build, hot restart) just goes back to add.
+    if (previous != IndexState.indexing) {
+      setState(() => _fabState = JaraFabState.add);
+      return;
+    }
+    setState(() => _fabState = JaraFabState.success);
+    _flash = Timer(_successFlash, () {
+      if (!mounted) return;
+      setState(() => _fabState = JaraFabState.add);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final s = ref.strings;
+    final shell = widget.shell;
+    ref.listen(indexStateProvider, _onIndexState);
+
     return Scaffold(
       backgroundColor: context.jara.surface,
       extendBody: true,
@@ -125,12 +169,13 @@ class JaraShell extends ConsumerWidget {
           initialLocation: index == shell.currentIndex,
         ),
         onFabTap: () => showAddSheet(context),
+        fabState: _fabState,
         fabSemanticLabel: s.addTitle,
         items: [
-          const JaraBottomBarItem(
+          JaraBottomBarItem(
             icon: Icons.search_rounded,
             selectedIcon: Icons.search_rounded,
-            label: 'Search',
+            label: s.searchAction,
           ),
           JaraBottomBarItem(
             icon: Icons.auto_awesome_motion_outlined,

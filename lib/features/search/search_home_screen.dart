@@ -97,6 +97,7 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
     final s = ref.strings;
     final stats = ref.watch(memoryStatsProvider);
     final prefix = _typed.trim();
+    final offline = ref.watch(offlineProvider);
 
     return HorizonScaffold(
       skyPadding: const EdgeInsets.fromLTRB(
@@ -106,6 +107,7 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
       sky: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          OfflineSlot(offline: offline, label: s.offlineLabel),
           NotchAppBar(
             leadingIcon: Icons.shield_outlined,
             onLeadingTap: () => context.push('/profile/privacy'),

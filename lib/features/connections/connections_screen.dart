@@ -39,6 +39,53 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  void _reconnect(ConnectionInfo c) {
+    setState(() => _overrides[c.id] = ConnectionStatus.connected);
+    JaraHaptics.confirm();
+  }
+
+  /// A card that needs attention is otherwise a dead end: tapping it opens
+  /// the one place that explains what broke and offers the way back.
+  Future<void> _showReconnectSheet(ConnectionInfo c) {
+    final t = context.jara;
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: t.surfaceElevated,
+      barrierColor: t.scrim,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(JaraRadius.sheet)),
+      ),
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+            JaraSpacing.xl, JaraSpacing.md, JaraSpacing.xl, JaraSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: t.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            ErrorStateView(
+              JaraError.accountDisconnected,
+              compact: true,
+              onPrimary: () {
+                Navigator.of(sheetContext).pop();
+                _reconnect(c);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   (Color, String) _statusVisuals(JaraTokens t, JaraStrings s, ConnectionStatus status) {
     return switch (status) {
       ConnectionStatus.connected => (t.success, s.connectionConnected),
@@ -67,7 +114,7 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                 NeuIconButton(
                   icon: Icons.arrow_back_ios_new_rounded,
                   onTap: () => context.pop(),
-                  semanticLabel: 'Back', // l10n-todo
+                  semanticLabel: s.back,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -99,9 +146,12 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
     final status = _overrides[c.id] ?? c.status;
     final (statusColor, statusLabel) = _statusVisuals(t, s, status);
     final connected = status == ConnectionStatus.connected;
+    final needsAttention = status == ConnectionStatus.attention;
 
     return NeuCard(
       padding: const EdgeInsets.all(14),
+      onTap: needsAttention ? () => _showReconnectSheet(c) : null,
+      semanticLabel: needsAttention ? '${c.name} · $statusLabel' : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -135,6 +185,13 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
                         ),
                         const SizedBox(width: 6),
                         Text(statusLabel, style: JaraType.caption.copyWith(color: statusColor)),
+                        // The whole card is the reconnect entry point;
+                        // the chevron is what says so.
+                        if (needsAttention) ...[
+                          const SizedBox(width: 2),
+                          Icon(Icons.chevron_right_rounded,
+                              size: 14, color: statusColor),
+                        ],
                       ],
                     ),
                   ],

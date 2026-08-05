@@ -104,6 +104,10 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
     final outcome = results.valueOrNull;
     final loading = results.isLoading;
     final summary = outcome?.summary;
+    final offline = ref.watch(offlineProvider);
+    // Type browsing (blank query) never asks for an answer, so the cloud
+    // notice would be noise there.
+    final answerable = ref.watch(searchQueryProvider).trim().isNotEmpty;
 
     return HorizonScaffold(
       controller: _scroll,
@@ -114,13 +118,13 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
       sky: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          OfflineSlot(offline: offline, label: s.offlineLabel),
           Row(
             children: [
               NeuIconButton(
                 icon: Icons.arrow_back_ios_new_rounded,
                 onSky: true,
-                // l10n-todo: no "back" key in the copy deck yet.
-                semanticLabel: 'Back',
+                semanticLabel: s.back,
                 onTap: () => context.pop(),
               ),
               const SizedBox(width: JaraSpacing.md),
@@ -159,8 +163,17 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
                     ),
             ),
           ),
+          // The answer is the one cloud-bound block here; local results
+          // below keep rendering either way.
+          if (offline && answerable) ...[
+            const SizedBox(height: JaraSpacing.lg),
+            _SummaryUnavailable(
+              title: s.smartSummaryTitle,
+              caption: s.needsConnection,
+            ),
+          ]
           // Only promise an answer if the last outcome actually had one.
-          if (summary != null) ...[
+          else if (summary != null) ...[
             const SizedBox(height: JaraSpacing.lg),
             if (loading)
               const SmartSummarySkeleton()
@@ -205,11 +218,13 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
     }
 
     if (results.hasError) {
-      return EmptyStateView(
-        icon: Icons.error_outline_rounded,
-        title: s.errorGenericTitle,
-        message: s.errorGenericBody,
-        primaryLabel: s.retry,
+      // Being offline only explains the failure when the query would have
+      // left the device at all; local-only search fails for other reasons.
+      final cloudQuery =
+          ref.watch(privacyTierProvider) == PrivacyTier.hybrid;
+      final offline = ref.watch(offlineProvider);
+      return ErrorStateView(
+        offline && cloudQuery ? JaraError.noConnection : JaraError.generic,
         onPrimary: () => ref.invalidate(searchResultsProvider),
       );
     }
@@ -269,6 +284,52 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
       key: _resultsKey,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: sections,
+    );
+  }
+}
+
+/// Marks the Smart Summary as cloud-only while offline — a quiet card in
+/// its slot instead of a skeleton that would spin forever.
+class _SummaryUnavailable extends StatelessWidget {
+  const _SummaryUnavailable({required this.title, required this.caption});
+
+  final String title;
+  final String caption;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.jara;
+    return MergeSemantics(
+      child: NeuCard(
+        onSky: true,
+        padding: const EdgeInsets.symmetric(
+            horizontal: JaraSpacing.lg, vertical: JaraSpacing.md),
+        child: Row(
+          children: [
+            Icon(Icons.cloud_off_rounded,
+                size: 18, color: t.textOnSkyTertiary),
+            const SizedBox(width: JaraSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: JaraType.footnoteMedium
+                        .copyWith(color: t.textOnSkySecondary),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    caption,
+                    style: JaraType.caption
+                        .copyWith(color: t.textOnSkyTertiary),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/memory_item.dart';
+import 'connectivity_service.dart';
 import 'mock_memory_repository.dart';
 
 final memoryRepositoryProvider =
@@ -56,7 +57,20 @@ enum PrivacyTier { localOnly, hybrid }
 final privacyTierProvider =
     StateProvider<PrivacyTier>((ref) => PrivacyTier.localOnly);
 
-final offlineProvider = StateProvider<bool>((ref) => false);
+/// Manual override for tests, demos and the debug toggle: null follows the
+/// platform. Kept apart from [offlineProvider] so screens keep reading a
+/// plain bool and never have to reason about "who set this".
+final offlineOverrideProvider = StateProvider<bool?>((ref) => null);
+
+/// Single source of truth for "is offline": the connectivity stream, with
+/// the override on top and `false` while the first platform read is in
+/// flight. Defaulting to online matters — a stream that never arrives must
+/// not make the app claim it is offline.
+final offlineProvider = Provider<bool>((ref) {
+  final override = ref.watch(offlineOverrideProvider);
+  if (override != null) return override;
+  return ref.watch(connectivityOfflineProvider).valueOrNull ?? false;
+});
 
 enum IndexState { idle, indexing }
 

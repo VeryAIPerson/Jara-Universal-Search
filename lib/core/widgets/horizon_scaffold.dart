@@ -16,8 +16,8 @@ class HorizonScaffold extends StatelessWidget {
     required this.sky,
     required this.surface,
     this.inverted = false,
-    this.skyPadding = const EdgeInsets.fromLTRB(20, 8, 20, 64),
-    this.surfacePadding = const EdgeInsets.fromLTRB(20, 0, 20, 120),
+    this.skyPadding = const EdgeInsets.fromLTRB(20, 8, 20, 96),
+    this.surfacePadding = const EdgeInsets.fromLTRB(20, 40, 20, 120),
     this.controller,
   });
 

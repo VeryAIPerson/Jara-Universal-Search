@@ -81,13 +81,15 @@ class SmartSummaryCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              JaraChip(
-                label: basedOnLabel,
-                icon: Icons.layers_outlined,
-                color: t.accentBright,
-                onTap: onViewSources,
+              Flexible(
+                child: JaraChip(
+                  label: basedOnLabel,
+                  icon: Icons.layers_outlined,
+                  color: t.accentBright,
+                  onTap: onViewSources,
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 12),
               Pressable(
                 onTap: onViewSources,
                 semanticLabel: viewSourcesLabel,

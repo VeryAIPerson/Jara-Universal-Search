@@ -23,8 +23,17 @@ final searchResultsProvider =
   final filter = ref.watch(activeFilterProvider);
   final repo = ref.watch(memoryRepositoryProvider);
   if (query.trim().isEmpty) {
-    return const SearchOutcome(
-        query: '', items: [], elapsed: Duration.zero);
+    if (filter == null) {
+      return const SearchOutcome(
+          query: '', items: [], elapsed: Duration.zero);
+    }
+    // Browsing a source type without a query (home tiles, "All" chips).
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    return SearchOutcome(
+      query: '',
+      items: repo.ofType(filter),
+      elapsed: const Duration(milliseconds: 60),
+    );
   }
   await Future<void>.delayed(const Duration(milliseconds: 260));
   return repo.search(query, filter: filter);

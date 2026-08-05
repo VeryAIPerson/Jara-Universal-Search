@@ -21,9 +21,14 @@ enum _DetailAction { saveToCollection, addTag, ask, delete }
 /// This screen is a reading column: title, meta, body, tags. Past ~680 the
 /// line length stops being readable, so wide windows gain margin instead.
 /// Phones fall through untouched — 390 was never near the cap.
+/// heightFactor: 1 is load-bearing. The bottom action bar is laid out by
+/// Scaffold with a loose height, so a plain Center would grow to the whole
+/// window, swallow the Scaffold and collapse the body to nothing.
 Widget _prose(WindowClass w, Widget child) => w.isPhone
     ? child
-    : Center(
+    : Align(
+        alignment: Alignment.topCenter,
+        heightFactor: 1,
         child: ConstrainedBox(
           constraints:
               const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),

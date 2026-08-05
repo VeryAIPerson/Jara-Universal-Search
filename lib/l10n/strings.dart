@@ -1,0 +1,221 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../core/data/providers.dart';
+import '../core/models/memory_item.dart';
+import 'strings_en.dart';
+import 'strings_tr.dart';
+
+/// Typed copy deck. Hand-rolled instead of gen-l10n so screens get a
+/// compile-safe API with zero codegen; swap to ARB when store
+/// localization scales past two languages (see docs/DECISIONS.md).
+abstract class JaraStrings {
+  const JaraStrings();
+
+  String get appName;
+  String get tagline;
+
+  // Onboarding
+  String get onb1Title;
+  String get onb1Body;
+  String get onb2Title;
+  String get onb2Body;
+  String get onb3Title;
+  String get onb3Body;
+  String get onbPrimaryCta;
+  String get onbSecondaryCta;
+  String get onbSkip;
+
+  // Search home
+  String greetingMorning(String name);
+  String greetingDay(String name);
+  String greetingEvening(String name);
+  String get searchTitle;
+  List<String> get searchHints;
+  String get filterAll;
+  String typeLabel(MemoryType type);
+  String typePluralLabel(MemoryType type);
+  String get sourcesSection;
+  String get recentSearches;
+  String get recentlySaved;
+  String get suggestedSearches;
+  String get seeAll;
+  String get memoryStatusTitle;
+  String memoryStatusItems(int items, int collections);
+  String memoryStatusFree(String free);
+  String indexedAgo(String ago);
+  String newItemsThisWeek(int count);
+
+  // Suggestions
+  String get suggestionsHistory;
+  String get suggestionsSmart;
+
+  // Results
+  String resultsCount(int count, String elapsed);
+  String get bestMatch;
+  String get smartSummaryTitle;
+  String basedOnItems(int count);
+  String get viewSources;
+  String get refineSearch;
+  String get saveAnswer;
+  String get copied;
+  String get sortRecent;
+  String get sortRelevance;
+
+  // Result actions
+  String get actionOpen;
+  String get actionPreview;
+  String get actionShare;
+  String get actionPin;
+  String get actionUnpin;
+  String get actionAddTag;
+  String get actionSaveToCollection;
+  String get actionAskAbout;
+  String get actionDelete;
+  String get actionOpenOriginal;
+  String get actionAskJara;
+
+  // Detail
+  String get detailRelated;
+  String get detailInCollection;
+  String get detailTags;
+  String get detailPeople;
+  String get detailSource;
+  String get detailAskPlaceholder;
+
+  // Add flow
+  String get addTitle;
+  String get addScanDocument;
+  String get addUploadFile;
+  String get addPhoto;
+  String get addScreenshot;
+  String get addVoiceNote;
+  String get addPasteText;
+  String get addSaveLink;
+  String get addCreateNote;
+  String get addConnectAccount;
+  String get addImportCalendar;
+  String get addSuccessTitle;
+  String get addSuccessSearchNow;
+  String get addSuggestedTitle;
+  String get addSuggestedTags;
+  String get addCollection;
+  String get addSaveInstantly;
+  String get addSave;
+
+  // Memory
+  String get memoryTitle;
+  String get memoryAll;
+  String get memoryPinned;
+  String get memoryRecent;
+  String get memoryTimeline;
+  String get collectionsTitle;
+  String collectionItems(int count);
+  String updatedAgo(String ago);
+
+  // Connections
+  String get connectionsTitle;
+  String get connectionsSubtitle;
+  String get connectionConnected;
+  String get connectionSyncing;
+  String get connectionDisconnected;
+  String get connectionAttention;
+  String get connectionConnect;
+  String get connectionDisconnect;
+  String get connectionReindex;
+  String lastSynced(String ago);
+
+  // Privacy
+  String get privacyTitle;
+  String get privacyLocalActive;
+  String get privacyCloudOff;
+  String get privacyCloudOn;
+  String get privacyOnDevice;
+  String get privacyOnDeviceBody;
+  String get privacyCloudSection;
+  String get privacyCloudBody;
+  String get privacyLocalAi;
+  String get privacyCloudAi;
+  String get privacyAppLock;
+  String get privacyBiometric;
+  String get privacySensitive;
+  String get privacyExport;
+  String get privacyClearHistory;
+  String get privacyDeleteAll;
+  String get privacyDeleteConfirmTitle;
+  String get privacyDeleteConfirmBody;
+  String get cancel;
+  String get confirmDelete;
+
+  // Settings
+  String get settingsTitle;
+  String get settingsTheme;
+  String get settingsThemeDark;
+  String get settingsThemeLight;
+  String get settingsThemeSystem;
+  String get settingsLanguage;
+  String get settingsSearchSources;
+  String get settingsVoice;
+  String get settingsStorage;
+  String get settingsIndexing;
+  String get settingsNotifications;
+  String get settingsConnectedAccounts;
+  String get settingsPrivacySecurity;
+  String get settingsSubscription;
+  String get settingsPremium;
+  String get settingsPremiumBody;
+
+  // States
+  String get emptyResultsTitle;
+  String get emptyResultsBody;
+  String get emptyResultsAdjust;
+  String get emptyResultsSearchAll;
+  String get emptyMemoryTitle;
+  String get emptyMemoryBody;
+  String get emptyMemoryCta;
+  String get offlineLabel;
+  String get offlineBody;
+  String get errorGenericTitle;
+  String get errorGenericBody;
+  String get retry;
+
+  // Share sheet
+  String get shareTitle;
+  String get shareSaveInstantly;
+  String get shareReview;
+  String get shareSaved;
+
+  // Time
+  String get today;
+  String get yesterday;
+  String daysAgo(int days);
+  String get inDays;
+  String minutesAgo(int m);
+  String hoursAgo(int h);
+}
+
+final stringsProvider = Provider<JaraStrings>((ref) {
+  final locale = ref.watch(localeProvider);
+  return locale.languageCode == 'tr'
+      ? const JaraStringsTr()
+      : const JaraStringsEn();
+});
+
+extension StringsContext on WidgetRef {
+  JaraStrings get strings => watch(stringsProvider);
+}
+
+/// Relative date label helper shared by cards.
+String relativeDate(JaraStrings s, DateTime date) {
+  final now = DateTime.now();
+  final diff = now.difference(date);
+  if (diff.isNegative) {
+    final days = date.difference(now).inDays;
+    if (days < 1) return s.today;
+    return '${s.inDays} $days d';
+  }
+  if (diff.inMinutes < 60) return s.minutesAgo(diff.inMinutes.clamp(1, 59));
+  if (diff.inHours < 24) return s.hoursAgo(diff.inHours);
+  if (diff.inDays < 2) return s.yesterday;
+  if (diff.inDays < 30) return s.daysAgo(diff.inDays);
+  return '${date.day}.${date.month}.${date.year}';
+}

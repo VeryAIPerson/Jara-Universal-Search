@@ -32,6 +32,24 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // D22: Play's Wear form factor demands `uses-feature watch
+    // required=true`, and that flag filters the phone build out of Play
+    // entirely — one manifest cannot serve both stores. The shared
+    // manifest stays required=false (side-loading and development work
+    // for both form factors); the wear flavour's manifest overrides it
+    // to true for store submission. Build the watch with:
+    //   flutter build appbundle --flavor wear -t lib/main_watch.dart
+    flavorDimensions += "form"
+    productFlavors {
+        create("phone") {
+            dimension = "form"
+            isDefault = true
+        }
+        create("wear") {
+            dimension = "form"
+        }
+    }
 }
 
 kotlin {

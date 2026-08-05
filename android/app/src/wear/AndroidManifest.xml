@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Store submission only: Play's Wear OS form factor requires the
+         watch feature to be required=true, which (by design) filters this
+         artifact out of the phone catalogue. The shared manifest keeps
+         required=false so development and side-loading stay unfiltered. -->
+    <uses-feature
+        android:name="android.hardware.type.watch"
+        android:required="true"
+        tools:replace="android:required" />
+</manifest>

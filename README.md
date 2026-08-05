@@ -1,8 +1,10 @@
 # JARA Universal Search
 
 Everything important. One search. — Kişisel dijital hafızanı tek merkezden,
-doğal dille arayan premium mobil uygulama (iOS · Android; web = tasarım
-demo hedefi).
+doğal dille arayan premium uygulama. **7 platform** (iOS · Android ·
+iPadOS/tablet · macOS · Windows · Linux · Wear OS; web = tasarım demo),
+**20 dil** (2 RTL dahil), adaptif Horizon düzeni (telefonda yatay S-kavis,
+tablet/masaüstünde dikey komut sütunu + iki pano, saatte tek akış).
 
 **Tasarım dili:** Lamplight — koyu "memory sky" + yumuşak neumorfik
 "surface" yarıküreleri, aralarında S-kavis Horizon; merkez Add FAB;
@@ -41,5 +43,9 @@ sorgularını dene).
 
 ## Kalite kapıları
 
-`flutter analyze` temiz · widget testleri · EN/TR parite (tipli deck) ·
-Reduce Motion + Semantics denetimi. Ayrıntı: docs/DESIGN_BRIEF_TR.md §15.
+`flutter analyze` temiz · **144 test**: davranış + 124 dil-parite testi
+(20 dil, çoğul/interpolasyon/marka korunumu) + 8 golden (4 imza ekran ×
+2 tema, sabitlenmiş saat, Linux-raster — CI Flutter sürümü sabit) ·
+Reduce Motion + Semantics denetimi. Saat kabuğu: `flutter run -t
+lib/main_watch.dart`. Ayrıntı: docs/DESIGN_BRIEF_TR.md §15 ve
+docs/PLATFORMS_AND_LOCALES.md §4.

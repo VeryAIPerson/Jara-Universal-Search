@@ -57,11 +57,22 @@ class HorizonScaffold extends StatelessWidget {
     final t = context.jara;
     final dir = Directionality.maybeOf(context) ?? TextDirection.ltr;
 
-    return switch (JaraBreakpoints.axisFor(context.windowClass)) {
-      HorizonAxis.horizontal => _stacked(t, dir),
-      HorizonAxis.vertical => _columns(t, dir),
-      HorizonAxis.none => _flat(t),
-    };
+    // The axis follows the scaffold's OWN width, not the window's: inside
+    // a two-pane shell the branch pane is phone-sized, and the phone
+    // layout is the one signed off for that width. Watches stay flat.
+    return LayoutBuilder(builder: (context, constraints) {
+      final axis = switch (JaraBreakpoints.axisFor(context.windowClass)) {
+        HorizonAxis.none => HorizonAxis.none,
+        _ when constraints.maxWidth < JaraBreakpoints.horizonVerticalMin =>
+          HorizonAxis.horizontal,
+        _ => HorizonAxis.vertical,
+      };
+      return switch (axis) {
+        HorizonAxis.horizontal => _stacked(t, dir),
+        HorizonAxis.vertical => _columns(t, dir),
+        HorizonAxis.none => _flat(t),
+      };
+    });
   }
 
   /// Phones: unchanged from the signed-off screenshots. The only new

@@ -65,6 +65,11 @@ abstract final class JaraBreakpoints {
   /// Width of the command column when the Horizon is vertical.
   static const double skyColumnWidth = 380;
 
+  /// A HorizonScaffold narrower than this lays out like a phone even on a
+  /// wide window — a two-pane branch pane is phone-sized, and forcing the
+  /// vertical column into it starves both hemispheres.
+  static const double horizonVerticalMin = 700;
+
   static const double railWidth = 88;
   static const double railExtendedWidth = 232;
 

@@ -117,14 +117,38 @@ Mevcut tipli Dart deck 2 dil için doğru karardı (D6) ve o karar zaten geçiş
 
 ---
 
-## 4) Uygulama sırası
+## 4) Uygulama durumu (2026-08-05 — tamamlandı)
 
-1. **Şimdi:** masaüstü hedefleri ✅, `breakpoints.dart` ✅, bu plan ✅
-2. **Çalışan cila turu bitince:** adaptif navigasyon (bottom bar ↔ ray ↔ kenar çubuğu),
-   dikey Horizon, iki pano, masaüstü klavye kısayolları
-3. **Sonra:** ARB geçişi + 20 dil + RTL aynalama paso
-4. **Sonra:** Wear OS kabuğu
-5. **v1.1:** Apple Watch SwiftUI companion
+1. ✅ Masaüstü hedefleri (macos/windows/linux) + `breakpoints.dart`
+2. ✅ Adaptif navigasyon: alt bar (telefon) ↔ 88dp ikon rayı (600+) ↔ 232dp
+   etiketli kenar çubuğu (1200+); iki pano (840+, `/item/:id` tek rota,
+   bariyersiz saydam sunum); ⌘/Ctrl+K·N·1-4·Esc; pencere başlığı + 420×640
+   minimum; hover durumları (yalnız işaretçi)
+3. ✅ Horizon dönüşü: eksen kararı **scaffold'un kendi genişliğinden**
+   (`horizonVerticalMin` 700) — iki panolu dal telefon düzenine düşer,
+   380dp sütun dar panoyu boğmaz. RTL'de kavis + tüm yönlü inset'ler
+   aynalanır (dört boyutta görsel doğrulandı)
+4. ✅ 20 dil: tipli deck ×20 (D20b), kayıt `lib/l10n/locales.dart`
+   (endonim adlar, dil-etiketi fallback'i), 124 parite testi
+5. ✅ Wear OS kabuğu (`lib/features/watch/`, `main_watch.dart`) + `wear`
+   product flavour (D22)
+6. ⏳ v1.1: Apple Watch SwiftUI companion (D18)
 
-Her adımın çıkışı: `flutter analyze` temiz + testler + çoklu boyutta görsel doğrulama
-(390 telefon · 834 tablet · 1440 masaüstü · 200 saat) + RTL ekran görüntüsü.
+Doğrulama kanıtı: `flutter analyze` temiz · 144 test (8 golden dahil,
+Linux-raster, CI Flutter 3.44.8'e sabit) · görsel turlar: 390 koyu+açık,
+834 ray+dikey Horizon, 1440 kenar çubuğu+iki pano, 390/834 Arapça RTL,
+gerçek tarayıcıda 1440 (0 sayfa hatası).
+
+### Cihazda kalan QA (bu ortamda kanıtlanamayanlar — dürüst liste)
+
+- **Gradle/flavour build:** ortamda Android SDK yok; `flutter build
+  appbundle --flavor wear -t lib/main_watch.dart` ve telefon build'i ilk
+  gerçek makinede koşulmalı. Dart tarafı `flutter build bundle` ile uçtan
+  uca derleniyor.
+- **RTL glif şekillendirme cihaz fontuyla:** test ortamında sistem fontu
+  olmadığından Arapça/Farsça glifler kutu çizildi; yapısal aynalama
+  doğrulandı, dizelerin bidi/şekillendirmesi L4'te UBA ile makine-doğrulandı.
+  Gerçek cihazda platform fallback'i (Noto/Geeza) devrede — bir kez gözle
+  doğrula.
+- **D21 ana dil gözden geçirmesi** (özellikle ar/fa/hi/th) store metinleriyle
+  birlikte.

@@ -167,25 +167,33 @@ class AdaptiveNavShell extends StatelessWidget {
   }
 
   Widget _panes(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(flex: 5, child: body),
-        Container(width: 1, color: context.jara.border),
-        Expanded(
-          flex: 4,
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: JaraBreakpoints.proseMaxWidth,
+    return LayoutBuilder(builder: (context, constraints) {
+      // The branch keeps priority: a reading pane is comfortable well
+      // under proseMaxWidth, while the branch below ~560 starts starving
+      // its own content. 40% capped to [340, 560] leaves the branch
+      // phone-sized or better at every two-pane window.
+      final detailWidth =
+          (constraints.maxWidth * 0.4).clamp(340.0, 560.0);
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: body),
+          Container(width: 1, color: context.jara.border),
+          SizedBox(
+            width: detailWidth,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: JaraBreakpoints.proseMaxWidth,
+                ),
+                child: detail ?? const _EmptyDetailPane(),
               ),
-              child: detail ?? const _EmptyDetailPane(),
             ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }
 
@@ -340,7 +348,9 @@ class _RailDestinationState extends State<_RailDestination> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        _SelectedDot(selected: selected, extended: true),
+                        // No trailing dot here: the tinted fill and border
+                        // already carry selection; a dot after the label
+                        // reads as a stray glyph.
                         const SizedBox(width: JaraSpacing.md),
                       ],
                     )

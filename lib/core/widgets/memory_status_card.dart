@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../design/jara_theme.dart';
-import '../design/tokens.dart';
 import '../design/typography.dart';
 import '../models/memory_item.dart';
 import 'neu_card.dart';

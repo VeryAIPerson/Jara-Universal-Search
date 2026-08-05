@@ -6,6 +6,7 @@ import '../models/memory_item.dart';
 import 'filter_chips.dart';
 import 'highlight_text.dart';
 import 'neu_card.dart';
+import 'pressable.dart';
 
 /// One result card for every memory type. Layout adapts per type:
 /// photos/screenshots lead with a thumbnail block, calendar with a date
@@ -66,7 +67,23 @@ class UniversalResultCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (item.pinned)
+                    if (onPin != null)
+                      Pressable(
+                        onTap: onPin,
+                        semanticLabel: item.pinned ? 'Unpin' : 'Pin',
+                        child: Padding(
+                          padding:
+                              const EdgeInsetsDirectional.only(start: 6),
+                          child: Icon(
+                            item.pinned
+                                ? Icons.push_pin_rounded
+                                : Icons.push_pin_outlined,
+                            size: 16,
+                            color: item.pinned ? t.gold : tertiary,
+                          ),
+                        ),
+                      )
+                    else if (item.pinned)
                       Padding(
                         padding: const EdgeInsetsDirectional.only(start: 6),
                         child: Icon(Icons.push_pin_rounded,

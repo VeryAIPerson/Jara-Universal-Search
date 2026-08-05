@@ -30,7 +30,6 @@ class TimelineRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.jara;
     final maxCount = counts.values.fold<int>(1, (m, c) => c > m ? c : m);
 
     return SizedBox(

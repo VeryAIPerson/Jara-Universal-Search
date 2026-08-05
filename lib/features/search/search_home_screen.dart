@@ -9,6 +9,7 @@ import '../../core/design/tokens.dart';
 import '../../core/design/typography.dart';
 import '../../core/l10n_bridge.dart';
 import '../../core/models/memory_item.dart';
+import '../../core/widgets/card_grid.dart';
 import '../../core/widgets/filter_chips.dart';
 import '../../core/widgets/horizon_scaffold.dart';
 import '../../core/widgets/jara_search_field.dart';
@@ -42,38 +43,6 @@ double _bottomRoom(WindowClass w) => w.usesRail ? JaraSpacing.xxxl : 120;
 double _skyInset(WindowClass w) => w.isPhone
     ? JaraBreakpoints.pageInsetFor(w)
     : JaraSpacing.page;
-
-/// Result cards read better side by side than as one very wide column —
-/// but only while each card keeps a scannable width.
-Widget _cardGrid(List<Widget> cards, int columns) {
-  const gap = JaraSpacing.md;
-  const minCard = 320.0;
-  return LayoutBuilder(
-    builder: (context, c) {
-      final fits = ((c.maxWidth + gap) / (minCard + gap)).floor();
-      final n = columns < fits ? columns : (fits < 1 ? 1 : fits);
-      if (n < 2) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < cards.length; i++) ...[
-              if (i > 0) const SizedBox(height: gap),
-              cards[i],
-            ],
-          ],
-        );
-      }
-      final width = ((c.maxWidth - gap * (n - 1)) / n).floorToDouble();
-      return Wrap(
-        spacing: gap,
-        runSpacing: gap,
-        children: [
-          for (final card in cards) SizedBox(width: width, child: card),
-        ],
-      );
-    },
-  );
-}
 
 /// Tab 0 — the command screen. Sky: identity, greeting, search. Surface:
 /// what is already in the memory (sources, recent searches, recent saves).
@@ -499,7 +468,7 @@ class _RecentlySaved extends ConsumerWidget {
     // Two-up from `expanded`: three full-bleed cards under a source grid
     // read as a wall of whitespace on a desktop window.
     if (w.usesTwoPane) {
-      return _cardGrid([for (var i = 0; i < items.length; i++) card(i)], 2);
+      return cardGrid([for (var i = 0; i < items.length; i++) card(i)], 2);
     }
 
     return Column(

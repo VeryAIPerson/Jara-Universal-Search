@@ -9,6 +9,7 @@ import '../../core/design/jara_theme.dart';
 import '../../core/design/tokens.dart';
 import '../../core/design/typography.dart';
 import '../../core/l10n_bridge.dart';
+import '../../core/widgets/card_grid.dart';
 import '../../core/widgets/filter_chips.dart';
 import '../../core/widgets/horizon_scaffold.dart';
 import '../../core/widgets/neu_card.dart';
@@ -30,38 +31,6 @@ Widget _statStrip(WindowClass w, Widget child) => w.isPhone
           child: child,
         ),
       );
-
-/// Result cards read better side by side than as one very wide column —
-/// but only while each card keeps a scannable width.
-Widget _cardGrid(List<Widget> cards, int columns) {
-  const gap = JaraSpacing.md;
-  const minCard = 320.0;
-  return LayoutBuilder(
-    builder: (context, c) {
-      final fits = ((c.maxWidth + gap) / (minCard + gap)).floor();
-      final n = columns < fits ? columns : (fits < 1 ? 1 : fits);
-      if (n < 2) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < cards.length; i++) ...[
-              if (i > 0) const SizedBox(height: gap),
-              cards[i],
-            ],
-          ],
-        );
-      }
-      final width = ((c.maxWidth - gap * (n - 1)) / n).floorToDouble();
-      return Wrap(
-        spacing: gap,
-        runSpacing: gap,
-        children: [
-          for (final card in cards) SizedBox(width: width, child: card),
-        ],
-      );
-    },
-  );
-}
 
 /// Memory tab — the inverted Horizon: the soft library sits on top, the
 /// deep sky carries the timeline underneath. Picking a day on the rail
@@ -230,7 +199,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
         // The library is the longest list in the app; from `expanded` two
         // columns roughly halve the scroll without shrinking a card.
         else if (w.usesTwoPane)
-          SizedBox(width: double.infinity, child: _cardGrid(cards, 2))
+          SizedBox(width: double.infinity, child: cardGrid(cards, 2))
         else
           for (var i = 0; i < cards.length; i++) ...[
             cards[i],

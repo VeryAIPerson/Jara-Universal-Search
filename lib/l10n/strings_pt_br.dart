@@ -292,6 +292,9 @@ class JaraStringsPtBr extends JaraStrings {
       'Isso remove todo o seu índice de memória deste dispositivo. Os '
       'originais nos seus aplicativos não são afetados.';
   @override
+  String get privacyDeleted =>
+      'Memória excluída deste dispositivo.';
+  @override
   String get cancel => 'Cancelar';
   @override
   String get confirmDelete => 'Excluir';

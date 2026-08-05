@@ -58,7 +58,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
             onPressed: () {
               Navigator.of(dialogContext).pop();
               JaraHaptics.heavy();
-              _snack('Your memory has been cleared.'); // l10n-todo
+              _snack(s.privacyDeleted);
             },
             style: TextButton.styleFrom(foregroundColor: t.error),
             child: Text(s.confirmDelete),

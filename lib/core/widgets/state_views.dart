@@ -255,10 +255,17 @@ class JaraButton extends StatelessWidget {
                   color: gold ? const Color(0xFF171B2C) : Colors.white),
               const SizedBox(width: 8),
             ],
-            Text(
-              label,
-              style: JaraType.button.copyWith(
-                color: gold ? const Color(0xFF171B2C) : Colors.white,
+            // Flexible so a long translation or large Dynamic Type
+            // ellipsizes instead of overflowing the fixed-height pill;
+            // loose fit keeps short labels shrink-wrapped as before.
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: JaraType.button.copyWith(
+                  color: gold ? const Color(0xFF171B2C) : Colors.white,
+                ),
               ),
             ),
           ],

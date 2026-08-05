@@ -289,6 +289,9 @@ class JaraStringsNl extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'Dit verwijdert je volledige geheugenindex van dit apparaat. Originelen in je apps blijven ongewijzigd.';
   @override
+  String get privacyDeleted =>
+      'Geheugen van dit apparaat verwijderd.';
+  @override
   String get cancel => 'Annuleren';
   @override
   String get confirmDelete => 'Verwijderen';

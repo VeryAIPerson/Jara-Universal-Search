@@ -288,6 +288,9 @@ class JaraStringsEs extends JaraStrings {
       'Esto elimina todo tu índice de memoria de este dispositivo. Los '
       'originales en tus apps no se ven afectados.';
   @override
+  String get privacyDeleted =>
+      'Memoria eliminada de este dispositivo.';
+  @override
   String get cancel => 'Cancelar';
   @override
   String get confirmDelete => 'Eliminar';

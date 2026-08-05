@@ -277,6 +277,9 @@ class JaraStringsKo extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       '이 기기에서 기억 색인 전체가 삭제돼요. 각 앱에 있는 원본은 영향을 받지 않아요.';
   @override
+  String get privacyDeleted =>
+      '이 기기에서 기억을 삭제했어요.';
+  @override
   String get cancel => '취소';
   @override
   String get confirmDelete => '삭제';

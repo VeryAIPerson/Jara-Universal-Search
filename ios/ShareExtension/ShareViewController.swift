@@ -41,6 +41,7 @@ final class ShareViewController: UIViewController {
     private let sync = DispatchQueue(label: "app.jara.shareextension.sync")
     private var sharedText: String?
     private var sharedURL: URL?
+    private var sharedSubject: String?
     private var imagePaths: [String] = []
 
     override func viewDidLoad() {
@@ -54,6 +55,14 @@ final class ShareViewController: UIViewController {
     private func collectAttachments() {
         let items = (extensionContext?.inputItems as? [NSExtensionItem]) ?? []
         for item in items {
+            // The item title is the page/document name most share sources
+            // set — the Android side reads EXTRA_SUBJECT for the same job.
+            if sharedSubject == nil,
+                let title = item.attributedTitle?.string
+                    .trimmingCharacters(in: .whitespacesAndNewlines),
+                !title.isEmpty {
+                sharedSubject = title
+            }
             for provider in item.attachments ?? [] {
                 load(provider)
             }
@@ -173,6 +182,7 @@ final class ShareViewController: UIViewController {
                 "type": "image",
                 "value": first,
                 "extras": Array(imagePaths.dropFirst()),
+                "subject": sharedSubject as Any,
             ]
         }
         if let url = sharedURL {
@@ -182,6 +192,7 @@ final class ShareViewController: UIViewController {
                 "type": isWeb ? "url" : "text",
                 "value": url.absoluteString,
                 "extras": [String](),
+                "subject": sharedSubject as Any,
             ]
         }
         let trimmed = sharedText?
@@ -196,6 +207,7 @@ final class ShareViewController: UIViewController {
                 "type": isWeb ? "url" : "text",
                 "value": text,
                 "extras": [String](),
+                "subject": sharedSubject as Any,
             ]
         }
         return nil

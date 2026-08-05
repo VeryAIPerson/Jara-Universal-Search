@@ -280,6 +280,9 @@ class JaraStringsId extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'Ini menghapus seluruh indeks memorimu dari perangkat ini. File asli di aplikasimu tidak terpengaruh.';
   @override
+  String get privacyDeleted =>
+      'Memori dihapus dari perangkat ini.';
+  @override
   String get cancel => 'Batal';
   @override
   String get confirmDelete => 'Hapus';

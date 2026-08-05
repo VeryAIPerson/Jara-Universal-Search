@@ -295,6 +295,9 @@ class JaraStringsFa extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'این کار کل نمایهٔ حافظهٔ شما را از این دستگاه پاک می‌کند. نسخه‌های اصلی در برنامه‌هایتان دست‌نخورده می‌مانند.';
   @override
+  String get privacyDeleted =>
+      'حافظه از این دستگاه حذف شد.';
+  @override
   String get cancel => 'انصراف';
   @override
   String get confirmDelete => 'حذف';

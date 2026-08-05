@@ -61,6 +61,7 @@ void main() {
         s.filterAll, s.memoryTitle, s.collectionsTitle, s.settingsTitle,
         s.privacyTitle, s.connectionsTitle, s.addTitle, s.shareTitle,
         s.emptyResultsTitle, s.emptyMemoryTitle, s.offlineLabel,
+        s.privacyDeleted,
         s.back, s.done, s.apply, s.continueCta, s.searchAction,
         s.needsConnection, s.today, s.tomorrow, s.yesterday,
         s.paywallTitle, s.paywallSubtitle, s.paywallFeatCloudTitle,

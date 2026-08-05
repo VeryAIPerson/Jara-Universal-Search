@@ -280,6 +280,9 @@ class JaraStringsVi extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'Xóa toàn bộ chỉ mục bộ nhớ khỏi thiết bị này. Các bản gốc trong ứng dụng của bạn không bị ảnh hưởng.';
   @override
+  String get privacyDeleted =>
+      'Đã xóa bộ nhớ khỏi thiết bị này.';
+  @override
   String get cancel => 'Hủy';
   @override
   String get confirmDelete => 'Xóa';

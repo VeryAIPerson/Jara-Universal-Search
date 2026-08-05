@@ -143,6 +143,9 @@ abstract class JaraStrings {
   String get privacyDeleteAll;
   String get privacyDeleteConfirmTitle;
   String get privacyDeleteConfirmBody;
+
+  /// Confirmation toast after delete-all completes.
+  String get privacyDeleted;
   String get cancel;
   String get confirmDelete;
 

@@ -275,6 +275,9 @@ class JaraStringsZhHant extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       '這會從本機刪除你整個記憶索引，但不會影響你各應用程式中的原始內容。';
   @override
+  String get privacyDeleted =>
+      '記憶已從此裝置刪除。';
+  @override
   String get cancel => '取消';
   @override
   String get confirmDelete => '刪除';

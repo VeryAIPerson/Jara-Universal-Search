@@ -293,6 +293,9 @@ class JaraStringsFr extends JaraStrings {
       'Cela supprime tout votre index de mémoire de cet appareil. Les '
       'originaux dans vos applications ne sont pas concernés.';
   @override
+  String get privacyDeleted =>
+      'Mémoire supprimée de cet appareil.';
+  @override
   String get cancel => 'Annuler';
   @override
   String get confirmDelete => 'Supprimer';

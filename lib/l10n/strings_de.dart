@@ -289,6 +289,9 @@ class JaraStringsDe extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'Dies entfernt deinen gesamten Gedächtnis-Index von diesem Gerät. Originale in deinen Apps sind davon nicht betroffen.';
   @override
+  String get privacyDeleted =>
+      'Gedächtnis von diesem Gerät gelöscht.';
+  @override
   String get cancel => 'Abbrechen';
   @override
   String get confirmDelete => 'Löschen';

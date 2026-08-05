@@ -294,6 +294,9 @@ class JaraStringsIt extends JaraStrings {
       'questo dispositivo. Gli originali nelle tue app non vengono '
       'modificati.';
   @override
+  String get privacyDeleted =>
+      'Memoria eliminata da questo dispositivo.';
+  @override
   String get cancel => 'Annulla';
   @override
   String get confirmDelete => 'Elimina';

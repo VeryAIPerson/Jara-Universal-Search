@@ -24,6 +24,7 @@ class SharedPayload {
     required this.type,
     required this.value,
     this.extras = const [],
+    this.subject,
   });
 
   /// Decodes the platform map, or null if anything is missing or the wrong
@@ -39,7 +40,16 @@ class SharedPayload {
             .where((e) => e.trim().isNotEmpty)
             .toList(growable: false) ??
         const <String>[];
-    return SharedPayload(type: type, value: value.trim(), extras: extras);
+    final rawSubject = map['subject'];
+    final subject = rawSubject is String && rawSubject.trim().isNotEmpty
+        ? rawSubject.trim()
+        : null;
+    return SharedPayload(
+      type: type,
+      value: value.trim(),
+      extras: extras,
+      subject: subject,
+    );
   }
 
   static SharedPayloadType? _typeOf(Object? raw) => switch (raw) {
@@ -53,6 +63,11 @@ class SharedPayload {
   final String value;
   final List<String> extras;
 
+  /// The sharer's own title for the payload — EXTRA_SUBJECT on Android,
+  /// the extension item's title on iOS. The best suggestion available,
+  /// because the source app wrote it, in the user's language.
+  final String? subject;
+
   /// Images in this share (1 for every non-image type).
   int get itemCount => 1 + extras.length;
 
@@ -60,7 +75,9 @@ class SharedPayload {
 
   /// Title JARA proposes in the capture form. Null for images: there is no
   /// text to derive one from, so the screen names those from the copy deck.
-  String? get suggestedTitle => switch (type) {
+  String? get suggestedTitle =>
+      subject ??
+      switch (type) {
         SharedPayloadType.url => _urlTitle(),
         SharedPayloadType.text => _textTitle(),
         SharedPayloadType.image => null,

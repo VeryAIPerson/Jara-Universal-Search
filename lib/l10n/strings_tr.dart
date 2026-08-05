@@ -280,6 +280,9 @@ class JaraStringsTr extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'Bu işlem hafıza indeksini bu cihazdan kaldırır. Uygulamalarındaki orijinaller etkilenmez.';
   @override
+  String get privacyDeleted =>
+      'Hafızan bu cihazdan silindi.';
+  @override
   String get cancel => 'Vazgeç';
   @override
   String get confirmDelete => 'Sil';

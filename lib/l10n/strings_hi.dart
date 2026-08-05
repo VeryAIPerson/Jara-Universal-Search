@@ -285,6 +285,9 @@ class JaraStringsHi extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'इससे आपकी पूरी मेमोरी इंडेक्स इस डिवाइस से हट जाएगी। आपके ऐप्स में मौजूद ओरिजिनल पर कोई असर नहीं होगा।';
   @override
+  String get privacyDeleted =>
+      'इस डिवाइस से मेमोरी हटा दी गई।';
+  @override
   String get cancel => 'रद्द करें';
   @override
   String get confirmDelete => 'डिलीट करें';

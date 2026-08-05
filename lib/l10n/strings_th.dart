@@ -282,6 +282,9 @@ class JaraStringsTh extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'การทำเช่นนี้จะลบดัชนีความทรงจำทั้งหมดออกจากเครื่องนี้ ไฟล์ต้นฉบับในแอปของคุณจะไม่ได้รับผลกระทบ';
   @override
+  String get privacyDeleted =>
+      'ลบความทรงจำออกจากอุปกรณ์นี้แล้ว';
+  @override
   String get cancel => 'ยกเลิก';
   @override
   String get confirmDelete => 'ลบ';

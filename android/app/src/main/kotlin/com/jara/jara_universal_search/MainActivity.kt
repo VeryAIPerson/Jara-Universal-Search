@@ -101,8 +101,17 @@ class MainActivity : FlutterActivity() {
         val text = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()
         if (text.isNullOrEmpty()) return null
         val type = if (isWebUrl(text)) TYPE_URL else TYPE_TEXT
-        return payload(type, text, emptyList())
+        return payload(type, text, emptyList(), subjectOf(intent))
     }
+
+    /**
+     * EXTRA_SUBJECT usually carries the page title next to an EXTRA_TEXT
+     * URL — the best title suggestion any app will ever hand us.
+     */
+    private fun subjectOf(intent: Intent): String? =
+        intent.getStringExtra(Intent.EXTRA_SUBJECT)
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
 
     /**
      * True only when the whole payload is one http(s) URL. "Read this
@@ -118,7 +127,8 @@ class MainActivity : FlutterActivity() {
 
     private fun singleImagePayload(intent: Intent): Map<String, Any?>? {
         val uri = intent.streamExtra() ?: return null
-        return payload(TYPE_IMAGE, uri.toString(), emptyList())
+        return payload(
+            TYPE_IMAGE, uri.toString(), emptyList(), subjectOf(intent))
     }
 
     private fun multiImagePayload(intent: Intent): Map<String, Any?>? {
@@ -126,17 +136,20 @@ class MainActivity : FlutterActivity() {
             .map { it.toString() }
             .filter { it.isNotEmpty() }
         if (uris.isEmpty()) return null
-        return payload(TYPE_IMAGE, uris.first(), uris.drop(1))
+        return payload(
+            TYPE_IMAGE, uris.first(), uris.drop(1), subjectOf(intent))
     }
 
     private fun payload(
         type: String,
         value: String,
         extras: List<String>,
+        subject: String?,
     ): Map<String, Any?> = mapOf(
         "type" to type,
         "value" to value,
         "extras" to extras,
+        "subject" to subject,
     )
 
     @Suppress("DEPRECATION")

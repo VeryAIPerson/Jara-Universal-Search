@@ -364,6 +364,9 @@ class JaraStringsAr extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'سيؤدي هذا إلى إزالة فهرس ذاكرتك بالكامل من هذا الجهاز. أما النسخ الأصلية في تطبيقاتك فلن تتأثر.';
   @override
+  String get privacyDeleted =>
+      'حُذفت الذاكرة من هذا الجهاز.';
+  @override
   String get cancel => 'إلغاء';
   @override
   String get confirmDelete => 'حذف';

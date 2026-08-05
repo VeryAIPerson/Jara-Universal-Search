@@ -308,6 +308,9 @@ class JaraStringsRu extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'Это удалит весь индекс памяти с этого устройства. Оригиналы в ваших приложениях не будут затронуты.';
   @override
+  String get privacyDeleted =>
+      'Память удалена с этого устройства.';
+  @override
   String get cancel => 'Отмена';
   @override
   String get confirmDelete => 'Удалить';

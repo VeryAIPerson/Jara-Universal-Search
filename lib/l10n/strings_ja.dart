@@ -280,6 +280,9 @@ class JaraStringsJa extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       '端末上の記憶インデックスがすべて削除されます。各アプリ内の元データには影響しません。';
   @override
+  String get privacyDeleted =>
+      'この端末から記憶を削除しました。';
+  @override
   String get cancel => 'キャンセル';
   @override
   String get confirmDelete => '削除';

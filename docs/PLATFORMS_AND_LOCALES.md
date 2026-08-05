@@ -157,4 +157,7 @@ gerçek tarayıcıda 1440 (0 sayfa hatası).
   Gerçek cihazda platform fallback'i (Noto/Geeza) devrede — bir kez gözle
   doğrula.
 - **D21 ana dil gözden geçirmesi** (özellikle ar/fa/hi/th) store metinleriyle
-  birlikte.
+  birlikte — paywall'un 17 anahtarı ve `privacyDeleted` dahil.
+- **Paylaşım alımının cihaz turu:** docs/SHARE_INTAKE.md'deki kontrol
+  listesi (Chrome/Photos/Notes'tan soğuk+sıcak paylaşım, Xcode'da
+  ShareExtension hedefi + App Group).

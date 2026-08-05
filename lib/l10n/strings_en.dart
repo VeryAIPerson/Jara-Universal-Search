@@ -280,6 +280,9 @@ class JaraStringsEn extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'This removes your entire memory index from this device. Originals in your apps are not affected.';
   @override
+  String get privacyDeleted =>
+      'Memory deleted from this device.';
+  @override
   String get cancel => 'Cancel';
   @override
   String get confirmDelete => 'Delete';

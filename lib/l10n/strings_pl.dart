@@ -308,6 +308,9 @@ class JaraStringsPl extends JaraStrings {
   String get privacyDeleteConfirmBody =>
       'To usunie cały indeks pamięci z tego urządzenia. Oryginały w twoich aplikacjach pozostaną nienaruszone.';
   @override
+  String get privacyDeleted =>
+      'Pamięć usunięta z tego urządzenia.';
+  @override
   String get cancel => 'Anuluj';
   @override
   String get confirmDelete => 'Usuń';

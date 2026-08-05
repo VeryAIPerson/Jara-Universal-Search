@@ -11,11 +11,14 @@ One payload shape, spoken by three languages. Change it in one place and
 all three must move together.
 
 ```
-{ "type": "text" | "url" | "image", "value": String, "extras": [String] }
+{ "type": "text" | "url" | "image", "value": String, "extras": [String], "subject": String? }
 ```
 
 - `value` — the text, the URL, or the **first** image reference.
 - `extras` — the remaining image references of a multi-image share.
+- `subject` — the sharer's own title (EXTRA_SUBJECT / extension item
+  title), nullable. Wins over any derived title suggestion: the source
+  app wrote it, in the user's language.
   Empty for `text` and `url`.
 - `url` vs `text` is decided **on the platform side**, never in Dart: a
   text/plain share whose whole payload parses as an `http(s)` URI with a
@@ -162,11 +165,6 @@ reading.
 
 ## 5) Known gaps (deliberate)
 
-- **`EXTRA_SUBJECT` is dropped.** Many apps put the page title there while
-  `EXTRA_TEXT` holds the URL — a good title suggestion we currently throw
-  away. Adding it means extending the payload contract with a fourth key
-  in all three languages; it was left out rather than smuggled into
-  `extras`, which is typed as image references.
 - **iOS read side is a TODO, not a stub.** See the block at the bottom of
   `lib/core/data/share_intake.dart`: it names the two files and the
   entitlement needed. Code that silently reads nothing would be worse than

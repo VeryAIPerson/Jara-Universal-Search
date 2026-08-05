@@ -3,10 +3,11 @@
          different Dart entrypoint:
          `flutter build apk -t lib/main_watch.dart`.
          required="false" is deliberate and load-bearing: a *required*
-         watch feature filters the phone build out of Play entirely. A
-         store-bound Wear artifact must flip this to true, which is why
-         shipping both form factors needs a product flavour rather than
-         one manifest — see the watch agent's report. -->
+         watch feature filters the phone build out of Play entirely.
+         Play's Wear OS form factor needs required="true", so shipping
+         both to the store means a `wear` product flavour with its own
+         src/wear/AndroidManifest.xml overriding this line — not one
+         shared manifest. -->
     <uses-feature
         android:name="android.hardware.type.watch"
         android:required="false" />

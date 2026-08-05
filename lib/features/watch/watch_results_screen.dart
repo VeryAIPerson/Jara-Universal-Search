@@ -93,8 +93,10 @@ class WatchResultsScreen extends ConsumerWidget {
     );
   }
 
+  /// Date first: the line ellipsizes on a narrow face, and "when" is what
+  /// a wearer is triangulating on — the coloured icon already says what.
   static String _metaFor(JaraStrings s, MemoryItem item) =>
-      '${item.source} · ${relativeDate(s, item.date)}';
+      '${relativeDate(s, item.date)} · ${item.source}';
 }
 
 /// Query line, optional offline marker, then whatever the state supplies.

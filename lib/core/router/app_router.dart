@@ -18,10 +18,17 @@ import '../../features/settings/profile_screen.dart';
 import '../../features/share/share_capture_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../data/providers.dart';
-import '../design/jara_theme.dart';
+import '../design/breakpoints.dart';
 import '../l10n_bridge.dart';
+import '../widgets/adaptive_nav.dart';
 import '../widgets/jara_bottom_bar.dart';
 import '../widgets/jara_fab.dart';
+
+/// Branch roots in destination order — the one list the bar, the rail and
+/// the Cmd/Ctrl+1..4 shortcuts navigate by.
+const _branchRoots = ['/search', '/memory', '/collections', '/profile'];
+
+const _detailPath = '/item/:id';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -101,15 +108,120 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
-        path: '/item/:id',
-        builder: (context, state) =>
-            ResultDetailScreen(itemId: state.pathParameters['id']!),
+        path: _detailPath,
+        pageBuilder: _detailPageBuilder,
       ),
     ],
   );
 });
 
-/// App shell: indexed branches over a floating bottom bar + center FAB.
+/// The detail is one route with two presentations. Narrow windows push the
+/// full page exactly as before; two-pane windows keep the route on the
+/// stack — so back, Esc and deep links behave identically — but render it
+/// as nothing, because [JaraShell] paints it in its trailing pane.
+Page<void> _detailPageBuilder(BuildContext context, GoRouterState state) {
+  final id = state.pathParameters['id']!;
+  if (JaraBreakpoints.of(context).usesTwoPane) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      name: state.name ?? state.path,
+      restorationId: state.pageKey.value,
+      opaque: false,
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+      transitionsBuilder: (context, animation, secondary, child) => child,
+      child: _DetailPaneHandoff(itemId: id),
+    );
+  }
+  return MaterialPage<void>(
+    key: state.pageKey,
+    name: state.name ?? state.path,
+    restorationId: state.pageKey.value,
+    arguments: <String, String>{
+      ...state.pathParameters,
+      ...state.uri.queryParameters,
+    },
+    child: ResultDetailScreen(itemId: id),
+  );
+}
+
+/// Stand-in for the detail page on two-pane windows. A deep link that
+/// lands straight on `/item/:id` has no shell underneath to paint the
+/// pane, so the stack is rebuilt once as list + detail.
+class _DetailPaneHandoff extends StatefulWidget {
+  const _DetailPaneHandoff({required this.itemId});
+
+  final String itemId;
+
+  @override
+  State<_DetailPaneHandoff> createState() => _DetailPaneHandoffState();
+}
+
+class _DetailPaneHandoffState extends State<_DetailPaneHandoff> {
+  bool _restacked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureShell());
+  }
+
+  void _ensureShell() {
+    if (!mounted || _restacked) return;
+    final router = GoRouter.of(context);
+    if (router.canPop()) return; // a shell is already below us
+    _restacked = true;
+    router.go(_branchRoots.first);
+    router.push('/item/${widget.itemId}');
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      const IgnorePointer(child: SizedBox.shrink());
+}
+
+/// Shortcut actions for when focus sits outside the shell — a pushed page,
+/// a sheet, a dialog. [JaraShell] overrides these with branch-aware ones
+/// while focus is inside it.
+Map<Type, Action<Intent>> jaraRootShortcutActions(GoRouter router) {
+  BuildContext? navigatorContext() =>
+      router.routerDelegate.navigatorKey.currentContext;
+
+  return <Type, Action<Intent>>{
+    JaraFocusSearchIntent: CallbackAction<JaraFocusSearchIntent>(
+      onInvoke: (_) {
+        router.go(_branchRoots.first);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final context = navigatorContext();
+          if (context != null) focusFirstField(context);
+        });
+        return null;
+      },
+    ),
+    JaraAddIntent: CallbackAction<JaraAddIntent>(
+      onInvoke: (_) {
+        final context = navigatorContext();
+        if (context != null) showAddSheet(context);
+        return null;
+      },
+    ),
+    JaraDismissIntent: CallbackAction<JaraDismissIntent>(
+      onInvoke: (_) {
+        if (router.canPop()) router.pop();
+        return null;
+      },
+    ),
+    JaraDestinationIntent: CallbackAction<JaraDestinationIntent>(
+      onInvoke: (intent) {
+        router.go(_branchRoots[intent.index]);
+        return null;
+      },
+    ),
+  };
+}
+
+/// App shell: indexed branches under adaptive navigation chrome, plus the
+/// trailing detail pane on windows wide enough to carry two.
 class JaraShell extends ConsumerStatefulWidget {
   const JaraShell({super.key, required this.shell});
 
@@ -152,26 +264,81 @@ class _JaraShellState extends ConsumerState<JaraShell> {
     });
   }
 
+  void _goBranch(int index) => widget.shell.goBranch(
+        index,
+        initialLocation: index == widget.shell.currentIndex,
+      );
+
+  /// Cmd/Ctrl+K: land on the search branch, then focus the field that
+  /// screen owns. Already inside it (home or results) means "focus what is
+  /// on screen" — never throw away a query the user typed.
+  void _focusSearch() {
+    if (widget.shell.currentIndex != 0) widget.shell.goBranch(0);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) focusFirstField(context);
+    });
+  }
+
+  /// The memory the router currently points at, or null. Selection travels
+  /// through the route so feature screens keep pushing `/item/:id` and
+  /// never learn about panes.
+  String? _selectedItemId() {
+    final state = GoRouter.of(context).state;
+    if (state.fullPath != _detailPath) return null;
+    return state.pathParameters['id'];
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = ref.strings;
     final shell = widget.shell;
     ref.listen(indexStateProvider, _onIndexState);
 
-    return Scaffold(
-      backgroundColor: context.jara.surface,
-      extendBody: true,
-      body: shell,
-      bottomNavigationBar: JaraBottomBar(
-        currentIndex: shell.currentIndex,
-        onTap: (index) => shell.goBranch(
-          index,
-          initialLocation: index == shell.currentIndex,
+    final twoPane = JaraBreakpoints.of(context).usesTwoPane;
+    final selectedId = twoPane ? _selectedItemId() : null;
+
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        JaraFocusSearchIntent: CallbackAction<JaraFocusSearchIntent>(
+          onInvoke: (_) {
+            _focusSearch();
+            return null;
+          },
         ),
-        onFabTap: () => showAddSheet(context),
+        JaraAddIntent: CallbackAction<JaraAddIntent>(
+          onInvoke: (_) {
+            showAddSheet(context);
+            return null;
+          },
+        ),
+        JaraDismissIntent: CallbackAction<JaraDismissIntent>(
+          onInvoke: (_) {
+            final router = GoRouter.of(context);
+            if (router.canPop()) router.pop();
+            return null;
+          },
+        ),
+        JaraDestinationIntent: CallbackAction<JaraDestinationIntent>(
+          onInvoke: (intent) {
+            _goBranch(intent.index);
+            return null;
+          },
+        ),
+      },
+      child: AdaptiveNavShell(
+        currentIndex: shell.currentIndex,
+        onDestinationSelected: _goBranch,
+        onAdd: () => showAddSheet(context),
         fabState: _fabState,
-        fabSemanticLabel: s.addTitle,
-        items: [
+        addLabel: s.addTitle,
+        body: shell,
+        detail: selectedId == null
+            ? null
+            : ResultDetailScreen(
+                key: ValueKey('detail-$selectedId'),
+                itemId: selectedId,
+              ),
+        destinations: [
           JaraBottomBarItem(
             icon: Icons.search_rounded,
             selectedIcon: Icons.search_rounded,

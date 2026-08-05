@@ -27,6 +27,13 @@ import 'search_overlays.dart';
 /// it becomes a rail, so the reservation would just be a gap.
 double _bottomRoom(WindowClass w) => w.usesRail ? JaraSpacing.xxxl : 120;
 
+/// Only the surface pane gains width with the window: once the Horizon
+/// rotates, the sky is a fixed 380 dp column that already spends 86 dp on
+/// the wave clearance, so a bigger inset there eats the column.
+double _skyInset(WindowClass w) => w.isPhone
+    ? JaraBreakpoints.pageInsetFor(w)
+    : JaraSpacing.page;
+
 /// Query tools cap out — a search field and a filter row stretched across
 /// a monitor read as a toolbar, not as a query. Phones stay untouched.
 Widget _queryColumn(WindowClass w, Widget child) => w.isPhone
@@ -175,8 +182,8 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
 
     return HorizonScaffold(
       controller: _scroll,
-      skyPadding:
-          EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset, 96),
+      skyPadding: EdgeInsets.fromLTRB(
+          _skyInset(w), JaraSpacing.sm, _skyInset(w), 96),
       surfacePadding: EdgeInsets.fromLTRB(
           inset, JaraSpacing.huge, inset, _bottomRoom(w)),
       sky: _queryColumn(

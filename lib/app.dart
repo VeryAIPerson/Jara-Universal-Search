@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/data/providers.dart';
 import 'core/design/jara_theme.dart';
 import 'core/router/app_router.dart';
+import 'core/widgets/adaptive_nav.dart';
 
 class JaraApp extends ConsumerWidget {
   const JaraApp({super.key});
@@ -19,6 +20,16 @@ class JaraApp extends ConsumerWidget {
       title: 'JARA Universal Search',
       debugShowCheckedModeBanner: false,
       routerConfig: router,
+      // Above the Navigator so a shortcut still fires while a pushed page
+      // or a sheet holds focus; the shell overrides the actions it can
+      // answer better (branch switching, focusing its own search field).
+      builder: (context, child) => Shortcuts(
+        shortcuts: jaraShortcuts(),
+        child: Actions(
+          actions: jaraRootShortcutActions(router),
+          child: child ?? const SizedBox.shrink(),
+        ),
+      ),
       themeMode: themeMode,
       theme: buildJaraTheme(Brightness.light),
       darkTheme: buildJaraTheme(Brightness.dark),

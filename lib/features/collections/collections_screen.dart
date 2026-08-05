@@ -72,8 +72,14 @@ class CollectionsScreen extends ConsumerWidget {
         );
 
     return HorizonScaffold(
-      skyPadding:
-          EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset, 96),
+      // Only the surface gains width with the window: the rotated
+      // Horizon's sky is a fixed 380 dp column with the wave clearance
+      // already inside it, so a bigger inset there eats the column.
+      skyPadding: EdgeInsets.fromLTRB(
+          w.isPhone ? inset : JaraSpacing.page,
+          JaraSpacing.sm,
+          w.isPhone ? inset : JaraSpacing.page,
+          96),
       surfacePadding: EdgeInsets.fromLTRB(inset, JaraSpacing.lg, inset,
           w.usesRail ? JaraSpacing.xxxl : 130),
       sky: _queryColumn(

@@ -9,8 +9,8 @@ class JaraStringsFa extends JaraStrings {
   /// date that may arrive as `5.8.2026`) so it cannot reorder against
   /// the Persian around it. The fixed Latin brand tokens below sit
   /// between two Persian runs and resolve correctly unaided.
-  static const String _fsi = '⁨';
-  static const String _pdi = '⁩';
+  static const String _fsi = '\u2068';
+  static const String _pdi = '\u2069';
 
   @override
   String get appName => 'JARA Universal Search';

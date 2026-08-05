@@ -73,8 +73,11 @@ class WatchMetrics {
   static double get _floor =>
       JaraBreakpoints.pageInsetFor(WindowClass.watch);
 
+  /// Wear's own content band is 5.2% a side; round faces here get 7.8%.
+  /// Wider would cost the two lines a result title needs, tighter would
+  /// push a row's corners at the caps too close to the bezel.
   double get _hInset =>
-      isRound ? face * 0.104 : math.max(_floor, face * 0.052);
+      isRound ? face * 0.078 : math.max(_floor, face * 0.052);
 
   /// Bigger than the horizontal one: the top and bottom of a circle are
   /// where a rectangle loses the most width.
@@ -91,7 +94,8 @@ class WatchMetrics {
 
   /// Inscribed square of the face — the widest a centred fixed element
   /// may be and still clear the curve at any vertical offset it can
-  /// reach. Hero elements (mic, orb, primary action, state text) use it.
+  /// reach. The listening label and the empty/offline/error copy are
+  /// capped to it; rows live in the wider scrolling band instead.
   double get heroWidth =>
       isRound ? face * 0.707 : size.width - _hInset * 2;
 
@@ -105,7 +109,8 @@ class WatchMetrics {
 abstract final class WatchSize {
   static const double touchMin = 52;
   static const double rowMin = 60;
-  static const double typeChip = 34;
+  static const double typeChip = 28;
+  static const double rowPadding = 10;
   static const double actionHeight = 56;
 }
 

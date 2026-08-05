@@ -23,8 +23,8 @@ abstract final class WatchType {
   /// Detail and state titles. title2 22, unchanged.
   static final title = JaraType.title2;
 
-  /// Result row title, two lines max. callout 15 → 18.
-  static final rowTitle = _up(JaraType.callout, 1.2);
+  /// Result row title, two lines max. callout 15 → 17.
+  static final rowTitle = _up(JaraType.callout, 1.15);
 
   /// Detail snippet and state body. body 16 → 18.
   static final body = _up(JaraType.body, 1.15);

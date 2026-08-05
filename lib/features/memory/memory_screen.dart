@@ -285,8 +285,13 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
     return HorizonScaffold(
       inverted: true,
       // Sky is the last panel here — clear the floating bottom bar. From
-      // `medium` up that bar is a rail, so the clearance is just a gap.
-      skyPadding: EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset,
+      // `medium` up that bar is a rail, so the clearance is just a gap,
+      // and the sky is a fixed 380 dp column that must keep the phone
+      // inset or the wave clearance leaves nothing for the timeline.
+      skyPadding: EdgeInsets.fromLTRB(
+          w.isPhone ? inset : JaraSpacing.page,
+          JaraSpacing.sm,
+          w.isPhone ? inset : JaraSpacing.page,
           w.usesRail ? JaraSpacing.huge : 140),
       surfacePadding:
           EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset, 0),

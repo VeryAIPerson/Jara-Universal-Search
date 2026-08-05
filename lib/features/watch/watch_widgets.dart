@@ -84,14 +84,14 @@ class WatchSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.jara;
-    return Align(
-      alignment: AlignmentDirectional.centerStart,
-      child: Text(
-        title.toUpperCase(),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: WatchType.section.copyWith(color: t.textOnSkyTertiary),
-      ),
+    // Centred, not leading: on a round face a full-width label runs at the
+    // chord where the glass is narrowest, and Wear centres headers anyway.
+    return Text(
+      title.toUpperCase(),
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: WatchType.section.copyWith(color: t.textOnSkyTertiary),
     );
   }
 }
@@ -162,7 +162,7 @@ class WatchResultRow extends StatelessWidget {
       child: Container(
         width: double.infinity,
         constraints: const BoxConstraints(minHeight: WatchSize.rowMin),
-        padding: const EdgeInsets.all(JaraSpacing.md),
+        padding: const EdgeInsets.all(WatchSize.rowPadding),
         decoration: BoxDecoration(
           color: t.tileOnSky,
           borderRadius: BorderRadius.circular(JaraRadius.card),
@@ -178,9 +178,9 @@ class WatchResultRow extends StatelessWidget {
                 color: item.type.color.withValues(alpha: 0.16),
                 borderRadius: BorderRadius.circular(JaraRadius.chip),
               ),
-              child: Icon(item.type.icon, size: 18, color: item.type.color),
+              child: Icon(item.type.icon, size: 16, color: item.type.color),
             ),
-            const SizedBox(width: JaraSpacing.md),
+            const SizedBox(width: JaraSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

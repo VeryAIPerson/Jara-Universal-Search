@@ -133,7 +133,17 @@ class PrivacyPill extends StatelessWidget {
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(width: 6),
-            Text(label, style: JaraType.caption.copyWith(color: color)),
+            // Flexible, not Expanded: the pill still shrink-wraps in an
+            // unbounded row, but truncates instead of overflowing when a
+            // translated label meets a narrow command column.
+            Flexible(
+              child: Text(
+                label,
+                style: JaraType.caption.copyWith(color: color),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
       );

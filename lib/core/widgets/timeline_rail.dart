@@ -133,11 +133,17 @@ class _DayColumn extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                // A day label must never wrap: the column is narrow by
+                // design and a second line would blow its fixed height.
                 if (selected) ...[
                   Text('${day.day}',
+                      maxLines: 1,
+                      softWrap: false,
                       style:
                           JaraType.title2.copyWith(color: Colors.white)),
                   Text(_months[day.month - 1],
+                      maxLines: 1,
+                      softWrap: false,
                       style: JaraType.caption
                           .copyWith(color: Colors.white)),
                   const SizedBox(height: 12),
@@ -146,6 +152,8 @@ class _DayColumn extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Text(
                       '${day.day}',
+                      maxLines: 1,
+                      softWrap: false,
                       style: JaraType.footnoteMedium
                           .copyWith(color: t.textOnSkyTertiary),
                     ),

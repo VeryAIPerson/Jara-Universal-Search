@@ -98,15 +98,23 @@ class MemoryStatusCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
+          // The card is as narrow as the vertical Horizon's command
+          // column; the variable label yields rather than overflow.
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(lastIndexedLabel,
-                  style: JaraType.caption
-                      .copyWith(color: t.textOnSkyTertiary)),
+              Expanded(
+                child: Text(lastIndexedLabel,
+                    style: JaraType.caption
+                        .copyWith(color: t.textOnSkyTertiary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+              ),
               Text(freeLabel,
                   style: JaraType.caption
-                      .copyWith(color: t.textOnSkySecondary)),
+                      .copyWith(color: t.textOnSkySecondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
         ],

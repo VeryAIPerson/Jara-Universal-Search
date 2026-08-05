@@ -26,7 +26,77 @@ class JaraFab extends StatefulWidget {
   State<JaraFab> createState() => _JaraFabState();
 }
 
-class _JaraFabState extends State<JaraFab>
+class _JaraFabState extends State<JaraFab> {
+  /// Desktop pointers only — touch never sets this.
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.jara;
+    final isSuccess = widget.state == JaraFabState.success;
+
+    return Semantics(
+      button: true,
+      label: widget.semanticLabel,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () {
+            JaraHaptics.confirm();
+            widget.onTap();
+          },
+          child: AnimatedContainer(
+            duration: JaraMotion.of(context, JaraMotion.gentle),
+            curve: JaraMotion.spring,
+            width: JaraSize.fab,
+            height: JaraSize.fab,
+            decoration: BoxDecoration(
+              gradient: isSuccess
+                  ? LinearGradient(colors: [t.gold, JaraPalette.goldBright])
+                  : t.accentGradient,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: _hovered ? 0.34 : 0.18),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: (isSuccess ? t.gold : t.accent)
+                      .withValues(alpha: 0.5),
+                  blurRadius: 28,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: JaraFabGlyph(state: widget.state),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The FAB's morphing glyph: plus → spinning sync → check. Split out so
+/// the desktop rail's Add button plays the same beats as the phone FAB.
+class JaraFabGlyph extends StatefulWidget {
+  const JaraFabGlyph({
+    super.key,
+    required this.state,
+    this.size = 30,
+    this.color = Colors.white,
+  });
+
+  final JaraFabState state;
+  final double size;
+  final Color color;
+
+  @override
+  State<JaraFabGlyph> createState() => _JaraFabGlyphState();
+}
+
+class _JaraFabGlyphState extends State<JaraFabGlyph>
     with SingleTickerProviderStateMixin {
   late final AnimationController _spin = AnimationController(
     vsync: this,
@@ -34,7 +104,7 @@ class _JaraFabState extends State<JaraFab>
   );
 
   @override
-  void didUpdateWidget(JaraFab old) {
+  void didUpdateWidget(JaraFabGlyph old) {
     super.didUpdateWidget(old);
     _sync();
   }
@@ -62,53 +132,16 @@ class _JaraFabState extends State<JaraFab>
 
   @override
   Widget build(BuildContext context) {
-    final t = context.jara;
-    final isSuccess = widget.state == JaraFabState.success;
-
-    return Semantics(
-      button: true,
-      label: widget.semanticLabel,
-      child: GestureDetector(
-        onTap: () {
-          JaraHaptics.confirm();
-          widget.onTap();
+    return RotationTransition(
+      turns: _spin,
+      child: Icon(
+        switch (widget.state) {
+          JaraFabState.add => Icons.add_rounded,
+          JaraFabState.indexing => Icons.sync_rounded,
+          JaraFabState.success => Icons.check_rounded,
         },
-        child: AnimatedContainer(
-          duration: JaraMotion.of(context, JaraMotion.gentle),
-          curve: JaraMotion.spring,
-          width: JaraSize.fab,
-          height: JaraSize.fab,
-          decoration: BoxDecoration(
-            gradient: isSuccess
-                ? LinearGradient(colors: [t.gold, JaraPalette.goldBright])
-                : t.accentGradient,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.18),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: (isSuccess ? t.gold : t.accent)
-                    .withValues(alpha: 0.5),
-                blurRadius: 28,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: RotationTransition(
-            turns: _spin,
-            child: Icon(
-              switch (widget.state) {
-                JaraFabState.add => Icons.add_rounded,
-                JaraFabState.indexing => Icons.sync_rounded,
-                JaraFabState.success => Icons.check_rounded,
-              },
-              color: Colors.white,
-              size: 30,
-            ),
-          ),
-        ),
+        color: widget.color,
+        size: widget.size,
       ),
     );
   }

@@ -43,47 +43,13 @@ class JaraBottomBar extends StatelessWidget {
     final t = context.jara;
     assert(items.length == 4, 'JaraBottomBar expects 4 destinations');
 
-    Widget slot(int index) {
-      final item = items[index];
-      final selected = index == currentIndex;
-      final color = selected
-          ? t.accent
-          : (t.isDark ? t.textOnSkyTertiary : t.textTertiary);
-      return Expanded(
-        child: Semantics(
-          button: true,
-          selected: selected,
-          label: item.label,
-          child: InkResponse(
-            onTap: () {
-              JaraHaptics.select();
-              onTap(index);
-            },
-            radius: 32,
-            child: SizedBox(
-              height: JaraSize.bottomBar,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(selected ? item.selectedIcon : item.icon,
-                      color: color, size: 24),
-                  const SizedBox(height: 5),
-                  AnimatedContainer(
-                    duration: JaraMotion.of(context, JaraMotion.base),
-                    width: selected ? 14 : 4,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: selected ? t.accent : Colors.transparent,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    Widget slot(int index) => Expanded(
+          child: _BarSlot(
+            item: items[index],
+            selected: index == currentIndex,
+            onTap: () => onTap(index),
           ),
-        ),
-      );
-    }
+        );
 
     return SafeArea(
       top: false,
@@ -133,6 +99,85 @@ class JaraBottomBar extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One destination well. The hover lift is desktop-only — a touch pointer
+/// never enters it, so the phone bar renders exactly as before.
+class _BarSlot extends StatefulWidget {
+  const _BarSlot({
+    required this.item,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final JaraBottomBarItem item;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  State<_BarSlot> createState() => _BarSlotState();
+}
+
+class _BarSlotState extends State<_BarSlot> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.jara;
+    final item = widget.item;
+    final selected = widget.selected;
+    final color =
+        selected ? t.accent : (t.isDark ? t.textOnSkyTertiary : t.textTertiary);
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: item.label,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: InkResponse(
+          onTap: () {
+            JaraHaptics.select();
+            widget.onTap();
+          },
+          radius: 32,
+          hoverColor: Colors.transparent,
+          child: SizedBox(
+            height: JaraSize.bottomBar,
+            child: Center(
+              child: AnimatedContainer(
+                duration: JaraMotion.of(context, JaraMotion.fast),
+                width: 56,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: _hovered ? t.tile : Colors.transparent,
+                  borderRadius: BorderRadius.circular(JaraRadius.chip),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(selected ? item.selectedIcon : item.icon,
+                        color: color, size: 24),
+                    const SizedBox(height: 5),
+                    AnimatedContainer(
+                      duration: JaraMotion.of(context, JaraMotion.base),
+                      width: selected ? 14 : 4,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: selected ? t.accent : Colors.transparent,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),

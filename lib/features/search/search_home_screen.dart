@@ -35,6 +35,14 @@ const _sourceTiles = <(MemoryType, String)>[
 /// it becomes a rail, so the reservation would just be a gap.
 double _bottomRoom(WindowClass w) => w.usesRail ? JaraSpacing.xxxl : 120;
 
+/// Only the surface pane actually gains width with the window. Once the
+/// Horizon rotates, the sky is a fixed 380 dp command column that already
+/// spends 86 dp on the wave clearance — growing its inset there would eat
+/// the column, not add margin to it.
+double _skyInset(WindowClass w) => w.isPhone
+    ? JaraBreakpoints.pageInsetFor(w)
+    : JaraSpacing.page;
+
 /// Query block cap: a search field 1300 dp wide is a bug, not a feature.
 /// Untouched on phones so the signed-off layout stays byte-identical.
 Widget _queryColumn(WindowClass w, Widget child) => w.isPhone
@@ -162,10 +170,11 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
     final offline = ref.watch(offlineProvider);
     final w = context.windowClass;
     final inset = JaraBreakpoints.pageInsetFor(w);
+    final skyInset = _skyInset(w);
 
     return HorizonScaffold(
       skyPadding:
-          EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset, 96),
+          EdgeInsets.fromLTRB(skyInset, JaraSpacing.sm, skyInset, 96),
       surfacePadding: EdgeInsets.fromLTRB(
           inset, JaraSpacing.huge, inset, _bottomRoom(w)),
       sky: Column(
@@ -188,24 +197,11 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: JaraSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _greeting(s),
-                        style: JaraType.callout
-                            .copyWith(color: t.textOnSkySecondary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: JaraSpacing.sm),
-                    PrivacyPill(
-                      label: s.privacyLocalActive,
-                      active: true,
-                      onTap: () => context.push('/profile/privacy'),
-                    ),
-                  ],
+                _GreetingRow(
+                  greeting: _greeting(s),
+                  pillLabel: s.privacyLocalActive,
+                  stacked: !w.isPhone,
+                  onPillTap: () => context.push('/profile/privacy'),
                 ),
                 const SizedBox(height: JaraSpacing.lg),
                 Text(
@@ -262,6 +258,58 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Greeting plus the local-only trust pill. They share a line on phones;
+/// in the rotated Horizon's 380 dp command column there is no room for
+/// two things side by side, so the pill drops under the greeting instead
+/// of squeezing it to an ellipsis.
+class _GreetingRow extends StatelessWidget {
+  const _GreetingRow({
+    required this.greeting,
+    required this.pillLabel,
+    required this.stacked,
+    required this.onPillTap,
+  });
+
+  final String greeting;
+  final String pillLabel;
+  final bool stacked;
+  final VoidCallback onPillTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.jara;
+    final text = Text(
+      greeting,
+      style: JaraType.callout.copyWith(color: t.textOnSkySecondary),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+    final pill = PrivacyPill(
+      label: pillLabel,
+      active: true,
+      onTap: onPillTap,
+    );
+
+    if (stacked) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          text,
+          const SizedBox(height: JaraSpacing.sm),
+          pill,
+        ],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(child: text),
+        const SizedBox(width: JaraSpacing.sm),
+        pill,
+      ],
     );
   }
 }

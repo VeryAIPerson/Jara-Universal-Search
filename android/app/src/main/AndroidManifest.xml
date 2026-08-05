@@ -1,4 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Wear OS (D18). The watch build is the same module with a
+         different Dart entrypoint:
+         `flutter build apk -t lib/main_watch.dart`.
+         required="false" is deliberate and load-bearing: a *required*
+         watch feature filters the phone build out of Play entirely. A
+         store-bound Wear artifact must flip this to true, which is why
+         shipping both form factors needs a product flavour rather than
+         one manifest — see the watch agent's report. -->
+    <uses-feature
+        android:name="android.hardware.type.watch"
+        android:required="false" />
     <application
         android:label="jara_universal_search"
         android:name="${applicationName}"
@@ -25,6 +36,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Wear OS standalone: JARA searches the on-device index, so the
+             watch app installs and runs without the phone app present.
+             Inert on phones. -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

@@ -101,7 +101,7 @@ class _WatchDetailScreenState extends ConsumerState<WatchDetailScreen> {
                 color: item.type.color.withValues(alpha: 0.16),
                 borderRadius: BorderRadius.circular(JaraRadius.chip),
               ),
-              child: Icon(item.type.icon, size: 18, color: item.type.color),
+              child: Icon(item.type.icon, size: 16, color: item.type.color),
             ),
             const SizedBox(height: JaraSpacing.md),
             Text(

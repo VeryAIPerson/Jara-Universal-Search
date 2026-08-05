@@ -8,8 +8,8 @@ class JaraStringsAr extends JaraStrings {
   /// decided at runtime (a user name, a formatted duration) so it can
   /// never reorder against the Arabic around it. Used sparingly — the
   /// fixed Latin brand tokens below resolve correctly on their own.
-  static const String _fsi = '⁨';
-  static const String _pdi = '⁩';
+  static const String _fsi = '\u2068';
+  static const String _pdi = '\u2069';
 
   /// Arabic noun agreement after a numeral: 1 takes the singular, 2 the
   /// dual, 3–10 the plural, 11–99 the accusative singular (tamyīz) and

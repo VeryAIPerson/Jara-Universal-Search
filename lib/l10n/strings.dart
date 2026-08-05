@@ -2,12 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/data/providers.dart';
 import '../core/models/memory_item.dart';
-import 'strings_en.dart';
-import 'strings_tr.dart';
+import 'locales.dart';
 
-/// Typed copy deck. Hand-rolled instead of gen-l10n so screens get a
-/// compile-safe API with zero codegen; swap to ARB when store
-/// localization scales past two languages (see docs/DECISIONS.md).
+/// Typed copy deck. Hand-rolled instead of gen-l10n: with 20 shipped
+/// languages the real risk is a missing key, and ARB resolves that
+/// silently at runtime while this makes it a compile error (D20b).
+/// The locale registry lives in locales.dart.
 abstract class JaraStrings {
   const JaraStrings();
 
@@ -234,12 +234,9 @@ enum JaraError {
   generic,
 }
 
-final stringsProvider = Provider<JaraStrings>((ref) {
-  final locale = ref.watch(localeProvider);
-  return locale.languageCode == 'tr'
-      ? const JaraStringsTr()
-      : const JaraStringsEn();
-});
+final stringsProvider = Provider<JaraStrings>(
+  (ref) => resolveJaraLocale(ref.watch(localeProvider)).strings,
+);
 
 extension StringsContext on WidgetRef {
   JaraStrings get strings => watch(stringsProvider);

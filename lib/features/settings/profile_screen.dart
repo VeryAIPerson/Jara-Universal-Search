@@ -12,6 +12,7 @@ import '../../core/l10n_bridge.dart';
 import '../../core/widgets/filter_chips.dart';
 import '../../core/widgets/neu_card.dart';
 import '../../core/widgets/notch_app_bar.dart';
+import '../../l10n/locales.dart';
 
 /// Inside a Wrap, SearchFilterChip's centered AnimatedContainer greedily
 /// fills the run's available width (each chip becomes a full-width bar).
@@ -111,24 +112,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: JaraSpacing.lg),
               SectionHeader(title: s.settingsLanguage),
+              // Twenty languages is a list, not a chip row. Each name is
+              // written in its own language so someone who cannot read the
+              // current UI can still find theirs.
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _segmented(SearchFilterChip(
-                    label: 'English',
-                    selected: locale.languageCode == 'en',
-                    onSky: false,
-                    onTap: () =>
-                        ref.read(localeProvider.notifier).state = const Locale('en'),
-                  )),
-                  _segmented(SearchFilterChip(
-                    label: 'Türkçe',
-                    selected: locale.languageCode == 'tr',
-                    onSky: false,
-                    onTap: () =>
-                        ref.read(localeProvider.notifier).state = const Locale('tr'),
-                  )),
+                  for (final entry in jaraLocales)
+                    _segmented(SearchFilterChip(
+                      label: entry.endonym,
+                      selected: resolveJaraLocale(locale).locale ==
+                          entry.locale,
+                      onSky: false,
+                      onTap: () => ref.read(localeProvider.notifier).state =
+                          entry.locale,
+                    )),
                 ],
               ),
               const SizedBox(height: JaraSpacing.xxl),

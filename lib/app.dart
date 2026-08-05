@@ -6,6 +6,7 @@ import 'core/data/providers.dart';
 import 'core/design/jara_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/widgets/adaptive_nav.dart';
+import 'l10n/locales.dart';
 
 class JaraApp extends ConsumerWidget {
   const JaraApp({super.key});
@@ -34,7 +35,13 @@ class JaraApp extends ConsumerWidget {
       theme: buildJaraTheme(Brightness.light),
       darkTheme: buildJaraTheme(Brightness.dark),
       locale: locale,
-      supportedLocales: const [Locale('en'), Locale('tr')],
+      supportedLocales: jaraSupportedLocales,
+      // Flutter derives text direction from the locale, but only for the
+      // tags its own delegates know. Resolving through our registry keeps
+      // Arabic and Persian mirroring even when a device asks for a
+      // regional variant we map by language tag alone.
+      localeResolutionCallback: (device, supported) =>
+          resolveJaraLocale(device ?? const Locale('en')).locale,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

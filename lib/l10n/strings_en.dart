@@ -319,6 +319,90 @@ class JaraStringsEn extends JaraStrings {
       'Cloud Intelligence, unlimited connections and priority indexing.';
 
   @override
+  String get back => 'Back';
+  @override
+  String get moreActions => 'More actions';
+  @override
+  String get done => 'Done';
+  @override
+  String get apply => 'Apply';
+  @override
+  String get continueCta => 'Continue';
+  @override
+  String get searchAction => 'Search';
+  @override
+  String get sortBy => 'Sort by';
+  @override
+  String get listening => 'Listening…';
+  @override
+  String get alwaysOn => 'Always on';
+  @override
+  String get clearDateFilter => 'Clear date filter';
+  @override
+  String get sectionGeneral => 'General';
+  @override
+  String get sectionIntelligence => 'Intelligence';
+  @override
+  String get sectionData => 'Data';
+  @override
+  String get productName => 'Universal Search';
+  @override
+  String get manualAddSource => 'Added by you';
+  @override
+  String get addedJustNow => 'Added just now — JARA is making this searchable.';
+
+  @override
+  String errorTitle(JaraError e) => switch (e) {
+        JaraError.permissionDenied => 'JARA needs your go-ahead',
+        JaraError.fileUnreadable => 'This file won’t open',
+        JaraError.indexingFailed => 'Indexing stopped early',
+        JaraError.accountDisconnected => 'Account needs reconnecting',
+        JaraError.noConnection => 'You’re offline',
+        JaraError.localModelNotReady => 'Still getting ready',
+        JaraError.storageFull => 'No room left on this device',
+        JaraError.sourceMissing => 'The original is gone',
+        JaraError.generic => 'Something needs a retry',
+      };
+
+  @override
+  String errorBody(JaraError e) => switch (e) {
+        JaraError.permissionDenied =>
+          'Allow access to this source and it becomes searchable right away.',
+        JaraError.fileUnreadable =>
+          'The file may be damaged or in a format JARA can’t read yet.',
+        JaraError.indexingFailed =>
+          'Some items weren’t added. Your existing memory is untouched.',
+        JaraError.accountDisconnected =>
+          'Sign in again to keep this account’s items up to date.',
+        JaraError.noConnection =>
+          'Your on-device memory keeps working. Cloud features resume automatically.',
+        JaraError.localModelNotReady =>
+          'On-device search is finishing setup. This takes a moment on first run.',
+        JaraError.storageFull =>
+          'Free up some space, then JARA can finish indexing.',
+        JaraError.sourceMissing =>
+          'This item was moved or deleted in its original app.',
+        JaraError.generic =>
+          'That didn’t go through. Your memory is safe — try again.',
+      };
+
+  @override
+  String? errorCta(JaraError e) => switch (e) {
+        JaraError.permissionDenied => 'Open settings',
+        JaraError.fileUnreadable => null,
+        JaraError.indexingFailed => 'Try again',
+        JaraError.accountDisconnected => 'Reconnect',
+        JaraError.noConnection => null,
+        JaraError.localModelNotReady => null,
+        JaraError.storageFull => 'Manage storage',
+        JaraError.sourceMissing => 'Remove from memory',
+        JaraError.generic => 'Try again',
+      };
+
+  @override
+  String get needsConnection => 'Needs connection';
+
+  @override
   String get emptyResultsTitle => 'Nothing matched yet';
   @override
   String get emptyResultsBody =>
@@ -359,11 +443,13 @@ class JaraStringsEn extends JaraStrings {
   @override
   String get today => 'Today';
   @override
+  String get tomorrow => 'Tomorrow';
+  @override
   String get yesterday => 'Yesterday';
   @override
   String daysAgo(int days) => '${days}d ago';
   @override
-  String get inDays => 'in';
+  String inDays(int days) => 'in $days days';
   @override
   String minutesAgo(int m) => '${m}m ago';
   @override

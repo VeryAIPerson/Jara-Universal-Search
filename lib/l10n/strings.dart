@@ -164,6 +164,32 @@ abstract class JaraStrings {
   String get settingsPremium;
   String get settingsPremiumBody;
 
+  // Generic UI verbs / section labels
+  String get back;
+  String get moreActions;
+  String get done;
+  String get apply;
+  String get continueCta;
+  String get searchAction;
+  String get sortBy;
+  String get listening;
+  String get alwaysOn;
+  String get clearDateFilter;
+  String get sectionGeneral;
+  String get sectionIntelligence;
+  String get sectionData;
+  String get productName;
+  String get manualAddSource;
+  String get addedJustNow;
+
+  // Error catalogue (see JaraError)
+  String errorTitle(JaraError e);
+  String errorBody(JaraError e);
+  String? errorCta(JaraError e);
+
+  /// Marks a cloud-only affordance while offline.
+  String get needsConnection;
+
   // States
   String get emptyResultsTitle;
   String get emptyResultsBody;
@@ -186,11 +212,26 @@ abstract class JaraStrings {
 
   // Time
   String get today;
+  String get tomorrow;
   String get yesterday;
   String daysAgo(int days);
-  String get inDays;
+  String inDays(int days);
   String minutesAgo(int m);
   String hoursAgo(int h);
+}
+
+/// Every user-visible failure the app can reach. Technical codes never
+/// surface — each case maps to a plain title/body/CTA triple.
+enum JaraError {
+  permissionDenied,
+  fileUnreadable,
+  indexingFailed,
+  accountDisconnected,
+  noConnection,
+  localModelNotReady,
+  storageFull,
+  sourceMissing,
+  generic,
 }
 
 final stringsProvider = Provider<JaraStrings>((ref) {
@@ -209,9 +250,11 @@ String relativeDate(JaraStrings s, DateTime date) {
   final now = DateTime.now();
   final diff = now.difference(date);
   if (diff.isNegative) {
-    final days = date.difference(now).inDays;
-    if (days < 1) return s.today;
-    return '${s.inDays} $days d';
+    final ahead = date.difference(now);
+    if (ahead.inHours < 24 && date.day == now.day) return s.today;
+    final days = ahead.inDays + 1;
+    if (days <= 1) return s.tomorrow;
+    return s.inDays(days);
   }
   if (diff.inMinutes < 60) return s.minutesAgo(diff.inMinutes.clamp(1, 59));
   if (diff.inHours < 24) return s.hoursAgo(diff.inHours);

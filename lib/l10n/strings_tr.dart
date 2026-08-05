@@ -319,6 +319,91 @@ class JaraStringsTr extends JaraStrings {
       'Bulut Zekâsı, sınırsız bağlantı ve öncelikli indeksleme.';
 
   @override
+  String get back => 'Geri';
+  @override
+  String get moreActions => 'Diğer işlemler';
+  @override
+  String get done => 'Bitti';
+  @override
+  String get apply => 'Uygula';
+  @override
+  String get continueCta => 'Devam';
+  @override
+  String get searchAction => 'Ara';
+  @override
+  String get sortBy => 'Sırala';
+  @override
+  String get listening => 'Dinliyor…';
+  @override
+  String get alwaysOn => 'Her zaman açık';
+  @override
+  String get clearDateFilter => 'Tarih filtresini kaldır';
+  @override
+  String get sectionGeneral => 'Genel';
+  @override
+  String get sectionIntelligence => 'Zekâ';
+  @override
+  String get sectionData => 'Veri';
+  @override
+  String get productName => 'Universal Search';
+  @override
+  String get manualAddSource => 'Senin eklediğin';
+  @override
+  String get addedJustNow =>
+      'Az önce eklendi — JARA bunu aranabilir hale getiriyor.';
+
+  @override
+  String errorTitle(JaraError e) => switch (e) {
+        JaraError.permissionDenied => 'JARA’nın onayına ihtiyacı var',
+        JaraError.fileUnreadable => 'Bu dosya açılmıyor',
+        JaraError.indexingFailed => 'İndeksleme yarıda kaldı',
+        JaraError.accountDisconnected => 'Hesabın yeniden bağlanmalı',
+        JaraError.noConnection => 'Çevrimdışısın',
+        JaraError.localModelNotReady => 'Hazırlık sürüyor',
+        JaraError.storageFull => 'Cihazda yer kalmadı',
+        JaraError.sourceMissing => 'Orijinal içerik yok',
+        JaraError.generic => 'Tekrar denemek gerek',
+      };
+
+  @override
+  String errorBody(JaraError e) => switch (e) {
+        JaraError.permissionDenied =>
+          'Bu kaynağa erişime izin ver; anında aranabilir olsun.',
+        JaraError.fileUnreadable =>
+          'Dosya bozuk olabilir ya da JARA’nın henüz okuyamadığı bir biçimde.',
+        JaraError.indexingFailed =>
+          'Bazı kayıtlar eklenemedi. Mevcut hafızan olduğu gibi duruyor.',
+        JaraError.accountDisconnected =>
+          'Bu hesabın kayıtları güncel kalsın diye yeniden giriş yap.',
+        JaraError.noConnection =>
+          'Cihazındaki hafıza çalışmaya devam ediyor. Bulut özellikleri otomatik dönecek.',
+        JaraError.localModelNotReady =>
+          'Cihaz içi arama kurulumunu tamamlıyor. İlk açılışta biraz sürer.',
+        JaraError.storageFull =>
+          'Biraz yer aç; JARA indekslemeyi tamamlasın.',
+        JaraError.sourceMissing =>
+          'Bu kayıt kendi uygulamasında taşınmış ya da silinmiş.',
+        JaraError.generic =>
+          'İşlem tamamlanamadı. Hafızan güvende — yeniden dene.',
+      };
+
+  @override
+  String? errorCta(JaraError e) => switch (e) {
+        JaraError.permissionDenied => 'Ayarları aç',
+        JaraError.fileUnreadable => null,
+        JaraError.indexingFailed => 'Tekrar dene',
+        JaraError.accountDisconnected => 'Yeniden bağla',
+        JaraError.noConnection => null,
+        JaraError.localModelNotReady => null,
+        JaraError.storageFull => 'Depolamayı yönet',
+        JaraError.sourceMissing => 'Hafızadan kaldır',
+        JaraError.generic => 'Tekrar dene',
+      };
+
+  @override
+  String get needsConnection => 'Bağlantı gerekir';
+
+  @override
   String get emptyResultsTitle => 'Henüz eşleşme yok';
   @override
   String get emptyResultsBody =>
@@ -359,11 +444,13 @@ class JaraStringsTr extends JaraStrings {
   @override
   String get today => 'Bugün';
   @override
+  String get tomorrow => 'Yarın';
+  @override
   String get yesterday => 'Dün';
   @override
   String daysAgo(int days) => '$days g önce';
   @override
-  String get inDays => 'sonra:';
+  String inDays(int days) => '$days gün sonra';
   @override
   String minutesAgo(int m) => '$m dk önce';
   @override

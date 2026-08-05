@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/motion.dart';
 import '../../core/design/tokens.dart';
@@ -16,36 +17,70 @@ import '../../core/widgets/neu_card.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/state_views.dart';
 
+/// A modal sheet that has to reach the thumb is a phone idiom. From
+/// `medium` up there is no thumb at the bottom edge and no reason to span
+/// the window, so the same content presents as a centred dialog surface.
+const double _dialogMaxWidth = 520;
+
+Future<T?> _present<T>(
+  BuildContext context, {
+  required Color background,
+  required Widget Function(bool dialog) builder,
+}) {
+  final t = context.jara;
+  if (!JaraBreakpoints.of(context).usesRail) {
+    return showModalBottomSheet<T>(
+      context: context,
+      backgroundColor: background,
+      barrierColor: t.scrim,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => builder(false),
+    );
+  }
+  return showDialog<T>(
+    context: context,
+    barrierColor: t.scrim,
+    builder: (_) => Dialog(
+      backgroundColor: background,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(JaraSpacing.xxl),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(JaraRadius.sheet),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _dialogMaxWidth),
+        child: builder(true),
+      ),
+    ),
+  );
+}
+
 /// Voice capture overlay — D12: full flow with waveform today, real STT in
 /// v1.1. Completes with the recognised query, or null when dismissed.
 Future<String?> showVoiceSearchSheet(BuildContext context) {
-  final t = context.jara;
-  return showModalBottomSheet<String>(
-    context: context,
-    backgroundColor: t.skyBottom,
-    barrierColor: t.scrim,
-    isScrollControlled: true,
-    useSafeArea: true,
-    builder: (_) => const _VoiceSheet(),
+  return _present<String>(
+    context,
+    background: context.jara.skyBottom,
+    builder: (dialog) => _VoiceSheet(dialog: dialog),
   );
 }
 
 /// Source + sort refinement sheet. Writes straight to [activeFilterProvider]
 /// so the results list reacts while the sheet is still open.
 Future<void> showSearchFilterSheet(BuildContext context) {
-  final t = context.jara;
-  return showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: t.surfaceElevated,
-    barrierColor: t.scrim,
-    isScrollControlled: true,
-    useSafeArea: true,
-    builder: (_) => const _FilterSheet(),
+  return _present<void>(
+    context,
+    background: context.jara.surfaceElevated,
+    builder: (dialog) => _FilterSheet(dialog: dialog),
   );
 }
 
 class _VoiceSheet extends ConsumerStatefulWidget {
-  const _VoiceSheet();
+  const _VoiceSheet({required this.dialog});
+
+  /// Dialog form: no drag handle, and the surface takes the dialog width.
+  final bool dialog;
 
   @override
   ConsumerState<_VoiceSheet> createState() => _VoiceSheetState();
@@ -95,11 +130,12 @@ class _VoiceSheetState extends ConsumerState<_VoiceSheet>
     final reduced = JaraMotion.reduced(context);
 
     return SizedBox(
+      width: widget.dialog ? double.infinity : null,
       height: 300,
       child: Column(
         children: [
           const SizedBox(height: JaraSpacing.md),
-          const _SheetHandle(onSky: true),
+          if (!widget.dialog) const _SheetHandle(onSky: true),
           const Spacer(),
           AnimatedBuilder(
             animation: _pulse,
@@ -224,7 +260,10 @@ class _Waveform extends StatelessWidget {
 }
 
 class _FilterSheet extends ConsumerStatefulWidget {
-  const _FilterSheet();
+  const _FilterSheet({required this.dialog});
+
+  /// Dialog form: no drag handle, tighter top inset.
+  final bool dialog;
 
   @override
   ConsumerState<_FilterSheet> createState() => _FilterSheetState();
@@ -252,8 +291,12 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _SheetHandle(),
-            const SizedBox(height: JaraSpacing.xl),
+            if (widget.dialog)
+              const SizedBox(height: JaraSpacing.sm)
+            else ...[
+              const _SheetHandle(),
+              const SizedBox(height: JaraSpacing.xl),
+            ],
             Text(s.refineSearch,
                 style: JaraType.title2.copyWith(color: t.textPrimary)),
             const SizedBox(height: JaraSpacing.lg),

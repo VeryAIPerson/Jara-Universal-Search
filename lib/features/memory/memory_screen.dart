@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/haptics.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/tokens.dart';
@@ -16,6 +17,63 @@ import '../../core/widgets/result_cards.dart';
 import '../../core/widgets/state_views.dart';
 import '../../core/widgets/timeline_rail.dart';
 import '../add/add_sheet.dart';
+
+/// Wide monitors gain margin, not longer rows.
+Widget _pageColumn(WindowClass w, Widget child) =>
+    w == WindowClass.large
+        ? Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                  maxWidth: JaraBreakpoints.contentMaxWidth),
+              child: child,
+            ),
+          )
+        : child;
+
+/// The three stat cards are a compact dashboard strip, not a banner: past
+/// this they stop carrying more information and only get emptier.
+Widget _statStrip(WindowClass w, Widget child) => w.isPhone
+    ? child
+    : Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
+          child: child,
+        ),
+      );
+
+/// Result cards read better side by side than as one very wide column —
+/// but only while each card keeps a scannable width.
+Widget _cardGrid(List<Widget> cards, int columns) {
+  const gap = JaraSpacing.md;
+  const minCard = 320.0;
+  return LayoutBuilder(
+    builder: (context, c) {
+      final fits = ((c.maxWidth + gap) / (minCard + gap)).floor();
+      final n = columns < fits ? columns : (fits < 1 ? 1 : fits);
+      if (n < 2) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < cards.length; i++) ...[
+              if (i > 0) const SizedBox(height: gap),
+              cards[i],
+            ],
+          ],
+        );
+      }
+      final width = ((c.maxWidth - gap * (n - 1)) / n).floorToDouble();
+      return Wrap(
+        spacing: gap,
+        runSpacing: gap,
+        children: [
+          for (final card in cards) SizedBox(width: width, child: card),
+        ],
+      );
+    },
+  );
+}
 
 /// Memory tab — the inverted Horizon: the soft library sits on top, the
 /// deep sky carries the timeline underneath. Picking a day on the rail

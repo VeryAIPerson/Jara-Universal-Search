@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/haptics.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/motion.dart';
@@ -21,6 +22,67 @@ import '../../core/widgets/skeletons.dart';
 import '../../core/widgets/smart_summary_card.dart';
 import '../../core/widgets/state_views.dart';
 import 'search_overlays.dart';
+
+/// The shell bar floats over the content on phones only; from `medium` up
+/// it becomes a rail, so the reservation would just be a gap.
+double _bottomRoom(WindowClass w) => w.usesRail ? JaraSpacing.xxxl : 120;
+
+/// Query tools cap out — a search field and a filter row stretched across
+/// a monitor read as a toolbar, not as a query. Phones stay untouched.
+Widget _queryColumn(WindowClass w, Widget child) => w.isPhone
+    ? child
+    : Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
+          child: child,
+        ),
+      );
+
+/// Wide monitors gain margin, not longer rows.
+Widget _pageColumn(WindowClass w, Widget child) =>
+    w == WindowClass.large
+        ? Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                  maxWidth: JaraBreakpoints.contentMaxWidth),
+              child: child,
+            ),
+          )
+        : child;
+
+/// Result cards read better side by side than as one very wide column —
+/// but only while each card keeps a scannable width.
+Widget _cardGrid(List<Widget> cards, int columns) {
+  const gap = JaraSpacing.md;
+  const minCard = 320.0;
+  return LayoutBuilder(
+    builder: (context, c) {
+      final fits = ((c.maxWidth + gap) / (minCard + gap)).floor();
+      final n = columns < fits ? columns : (fits < 1 ? 1 : fits);
+      if (n < 2) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < cards.length; i++) ...[
+              if (i > 0) const SizedBox(height: gap),
+              cards[i],
+            ],
+          ],
+        );
+      }
+      final width = ((c.maxWidth - gap * (n - 1)) / n).floorToDouble();
+      return Wrap(
+        spacing: gap,
+        runSpacing: gap,
+        children: [
+          for (final card in cards) SizedBox(width: width, child: card),
+        ],
+      );
+    },
+  );
+}
 
 /// Results live in the same Horizon frame as the home screen: the query
 /// tools stay on the sky, the answers rise on the surface.
@@ -108,95 +170,100 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
     // Type browsing (blank query) never asks for an answer, so the cloud
     // notice would be noise there.
     final answerable = ref.watch(searchQueryProvider).trim().isNotEmpty;
+    final w = context.windowClass;
+    final inset = JaraBreakpoints.pageInsetFor(w);
 
     return HorizonScaffold(
       controller: _scroll,
-      skyPadding: const EdgeInsets.fromLTRB(
-          JaraSpacing.page, JaraSpacing.sm, JaraSpacing.page, 96),
-      surfacePadding: const EdgeInsets.fromLTRB(
-          JaraSpacing.page, JaraSpacing.huge, JaraSpacing.page, 120),
-      sky: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          OfflineSlot(offline: offline, label: s.offlineLabel),
-          Row(
-            children: [
-              NeuIconButton(
-                icon: Icons.arrow_back_ios_new_rounded,
-                onSky: true,
-                semanticLabel: s.back,
-                onTap: () => context.pop(),
-              ),
-              const SizedBox(width: JaraSpacing.md),
-              Expanded(
-                child: JaraSearchField(
-                  controller: _controller,
-                  hints: const [],
-                  onSubmitted: _submit,
-                  onVoiceTap: _startVoiceSearch,
+      skyPadding:
+          EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset, 96),
+      surfacePadding: EdgeInsets.fromLTRB(
+          inset, JaraSpacing.huge, inset, _bottomRoom(w)),
+      sky: _queryColumn(
+        w,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            OfflineSlot(offline: offline, label: s.offlineLabel),
+            Row(
+              children: [
+                NeuIconButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onSky: true,
+                  semanticLabel: s.back,
+                  onTap: () => context.pop(),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          FilterChipRow(
-            selected: ref.watch(activeFilterProvider),
-            onSelected: (type) =>
-                ref.read(activeFilterProvider.notifier).state = type,
-            allLabel: s.filterAll,
-            labelOf: s.typeLabel,
-          ),
-          const SizedBox(height: JaraSpacing.md),
-          SizedBox(
-            height: 16,
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: loading || outcome == null
-                  ? const SkeletonLine(width: 140, height: 10)
-                  : Text(
-                      s.resultsCount(
-                        outcome.items.length,
-                        '${(outcome.elapsed.inMilliseconds / 1000).toStringAsFixed(1)} s',
+                const SizedBox(width: JaraSpacing.md),
+                Expanded(
+                  child: JaraSearchField(
+                    controller: _controller,
+                    hints: const [],
+                    onSubmitted: _submit,
+                    onVoiceTap: _startVoiceSearch,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            FilterChipRow(
+              selected: ref.watch(activeFilterProvider),
+              onSelected: (type) =>
+                  ref.read(activeFilterProvider.notifier).state = type,
+              allLabel: s.filterAll,
+              labelOf: s.typeLabel,
+            ),
+            const SizedBox(height: JaraSpacing.md),
+            SizedBox(
+              height: 16,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: loading || outcome == null
+                    ? const SkeletonLine(width: 140, height: 10)
+                    : Text(
+                        s.resultsCount(
+                          outcome.items.length,
+                          '${(outcome.elapsed.inMilliseconds / 1000).toStringAsFixed(1)} s',
+                        ),
+                        style:
+                            JaraType.caption.copyWith(color: t.textOnSkyTertiary),
                       ),
-                      style:
-                          JaraType.caption.copyWith(color: t.textOnSkyTertiary),
-                    ),
-            ),
-          ),
-          // The answer is the one cloud-bound block here; local results
-          // below keep rendering either way.
-          if (offline && answerable) ...[
-            const SizedBox(height: JaraSpacing.lg),
-            _SummaryUnavailable(
-              title: s.smartSummaryTitle,
-              caption: s.needsConnection,
-            ),
-          ]
-          // Only promise an answer if the last outcome actually had one.
-          else if (summary != null) ...[
-            const SizedBox(height: JaraSpacing.lg),
-            if (loading)
-              const SmartSummarySkeleton()
-            else
-              SmartSummaryCard(
-                summary: summary,
-                titleLabel: s.smartSummaryTitle,
-                basedOnLabel: s.basedOnItems(summary.sourceCount),
-                viewSourcesLabel: s.viewSources,
-                onViewSources: _scrollToResults,
-                onCopy: () {
-                  Clipboard.setData(ClipboardData(text: summary.text));
-                  _notify(s.copied);
-                },
-                onSave: () {
-                  JaraHaptics.confirm();
-                  _notify(s.shareSaved);
-                },
               ),
+            ),
+            // The answer is the one cloud-bound block here; local results
+            // below keep rendering either way.
+            if (offline && answerable) ...[
+              const SizedBox(height: JaraSpacing.lg),
+              _SummaryUnavailable(
+                title: s.smartSummaryTitle,
+                caption: s.needsConnection,
+              ),
+            ]
+            // Only promise an answer if the last outcome actually had one.
+            else if (summary != null) ...[
+              const SizedBox(height: JaraSpacing.lg),
+              if (loading)
+                const SmartSummarySkeleton()
+              else
+                SmartSummaryCard(
+                  summary: summary,
+                  titleLabel: s.smartSummaryTitle,
+                  basedOnLabel: s.basedOnItems(summary.sourceCount),
+                  viewSourcesLabel: s.viewSources,
+                  onViewSources: _scrollToResults,
+                  onCopy: () {
+                    Clipboard.setData(ClipboardData(text: summary.text));
+                    _notify(s.copied);
+                  },
+                  onSave: () {
+                    JaraHaptics.confirm();
+                    _notify(s.shareSaved);
+                  },
+                ),
+            ],
           ],
-        ],
+        ),
       ),
-      surface: _surface(context, s, results),
+      surface: _pageColumn(w, _surface(context, s, results)),
     );
   }
 
@@ -266,6 +333,11 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
       card(best),
     ];
 
+    // The best match stays one wide card — it is the answer, not an entry
+    // in a list. Everything under it pairs up from `expanded`, where one
+    // 1300 dp column costs more eye travel than two 650 dp ones.
+    final twoUp = context.windowClass.usesTwoPane;
+
     // The best match keeps its own section; its group only reappears when
     // it holds something else.
     for (final group in outcome.grouped.entries) {
@@ -274,6 +346,10 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
       sections
         ..add(const SizedBox(height: JaraSpacing.xl))
         ..add(SectionHeader(title: s.typePluralLabel(group.key)));
+      if (twoUp) {
+        sections.add(_cardGrid([for (final item in rest) card(item)], 2));
+        continue;
+      }
       for (var i = 0; i < rest.length; i++) {
         if (i > 0) sections.add(const SizedBox(height: JaraSpacing.md));
         sections.add(card(rest[i]));

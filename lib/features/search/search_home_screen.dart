@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/tokens.dart';
 import '../../core/design/typography.dart';
@@ -29,6 +30,67 @@ const _sourceTiles = <(MemoryType, String)>[
   (MemoryType.link, '.url'),
   (MemoryType.audio, '.m4a'),
 ];
+
+/// The shell bar floats over the content on phones only; from `medium` up
+/// it becomes a rail, so the reservation would just be a gap.
+double _bottomRoom(WindowClass w) => w.usesRail ? JaraSpacing.xxxl : 120;
+
+/// Query block cap: a search field 1300 dp wide is a bug, not a feature.
+/// Untouched on phones so the signed-off layout stays byte-identical.
+Widget _queryColumn(WindowClass w, Widget child) => w.isPhone
+    ? child
+    : Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
+          child: child,
+        ),
+      );
+
+/// Wide monitors gain margin, not longer rows.
+Widget _pageColumn(WindowClass w, Widget child) =>
+    w == WindowClass.large
+        ? Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                  maxWidth: JaraBreakpoints.contentMaxWidth),
+              child: child,
+            ),
+          )
+        : child;
+
+/// Result cards read better side by side than as one very wide column —
+/// but only while each card keeps a scannable width.
+Widget _cardGrid(List<Widget> cards, int columns) {
+  const gap = JaraSpacing.md;
+  const minCard = 320.0;
+  return LayoutBuilder(
+    builder: (context, c) {
+      final fits = ((c.maxWidth + gap) / (minCard + gap)).floor();
+      final n = columns < fits ? columns : (fits < 1 ? 1 : fits);
+      if (n < 2) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < cards.length; i++) ...[
+              if (i > 0) const SizedBox(height: gap),
+              cards[i],
+            ],
+          ],
+        );
+      }
+      final width = ((c.maxWidth - gap * (n - 1)) / n).floorToDouble();
+      return Wrap(
+        spacing: gap,
+        runSpacing: gap,
+        children: [
+          for (final card in cards) SizedBox(width: width, child: card),
+        ],
+      );
+    },
+  );
+}
 
 /// Tab 0 — the command screen. Sky: identity, greeting, search. Surface:
 /// what is already in the memory (sources, recent searches, recent saves).
@@ -98,12 +160,14 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
     final stats = ref.watch(memoryStatsProvider);
     final prefix = _typed.trim();
     final offline = ref.watch(offlineProvider);
+    final w = context.windowClass;
+    final inset = JaraBreakpoints.pageInsetFor(w);
 
     return HorizonScaffold(
-      skyPadding: const EdgeInsets.fromLTRB(
-          JaraSpacing.page, JaraSpacing.sm, JaraSpacing.page, 96),
-      surfacePadding: const EdgeInsets.fromLTRB(
-          JaraSpacing.page, JaraSpacing.huge, JaraSpacing.page, 120),
+      skyPadding:
+          EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset, 96),
+      surfacePadding: EdgeInsets.fromLTRB(
+          inset, JaraSpacing.huge, inset, _bottomRoom(w)),
       sky: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -118,74 +182,85 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
             avatarInitials: 'A',
             onAvatarTap: () => context.go('/profile'),
           ),
-          const SizedBox(height: JaraSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _greeting(s),
-                  style:
-                      JaraType.callout.copyWith(color: t.textOnSkySecondary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          _queryColumn(
+            w,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: JaraSpacing.md),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _greeting(s),
+                        style: JaraType.callout
+                            .copyWith(color: t.textOnSkySecondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: JaraSpacing.sm),
+                    PrivacyPill(
+                      label: s.privacyLocalActive,
+                      active: true,
+                      onTap: () => context.push('/profile/privacy'),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: JaraSpacing.sm),
-              PrivacyPill(
-                label: s.privacyLocalActive,
-                active: true,
-                onTap: () => context.push('/profile/privacy'),
-              ),
-            ],
-          ),
-          const SizedBox(height: JaraSpacing.lg),
-          Text(
-            s.searchTitle,
-            style: JaraType.display.copyWith(color: t.textOnSky),
-          ),
-          const SizedBox(height: JaraSpacing.xl),
-          JaraSearchField(
-            controller: _controller,
-            hints: s.searchHints,
-            onChanged: (value) => setState(() => _typed = value),
-            onSubmitted: (value) => _runSearch(value),
-            onVoiceTap: _startVoiceSearch,
-            onFilterTap: () => showSearchFilterSheet(context),
-          ),
-          if (prefix.isEmpty) ...[
-            const SizedBox(height: JaraSpacing.xl),
-            MemoryStatusCard(
-              stats: stats,
-              title: s.memoryStatusTitle,
-              itemsLabel:
-                  s.memoryStatusItems(stats.totalItems, stats.collections),
-              freeLabel: stats.storageFreeLabel,
-              lastIndexedLabel:
-                  s.indexedAgo(relativeDate(s, stats.lastIndexed)),
-              onTap: () => context.go('/memory'),
+                const SizedBox(height: JaraSpacing.lg),
+                Text(
+                  s.searchTitle,
+                  style: JaraType.display.copyWith(color: t.textOnSky),
+                ),
+                const SizedBox(height: JaraSpacing.xl),
+                JaraSearchField(
+                  controller: _controller,
+                  hints: s.searchHints,
+                  onChanged: (value) => setState(() => _typed = value),
+                  onSubmitted: (value) => _runSearch(value),
+                  onVoiceTap: _startVoiceSearch,
+                  onFilterTap: () => showSearchFilterSheet(context),
+                ),
+                if (prefix.isEmpty) ...[
+                  const SizedBox(height: JaraSpacing.xl),
+                  MemoryStatusCard(
+                    stats: stats,
+                    title: s.memoryStatusTitle,
+                    itemsLabel: s.memoryStatusItems(
+                        stats.totalItems, stats.collections),
+                    freeLabel: stats.storageFreeLabel,
+                    lastIndexedLabel:
+                        s.indexedAgo(relativeDate(s, stats.lastIndexed)),
+                    onTap: () => context.go('/memory'),
+                  ),
+                ] else ...[
+                  const SizedBox(height: JaraSpacing.md),
+                  _Suggestions(prefix: prefix, onPick: _runSearch),
+                ],
+              ],
             ),
-          ] else ...[
-            const SizedBox(height: JaraSpacing.md),
-            _Suggestions(prefix: prefix, onPick: _runSearch),
-          ],
+          ),
         ],
       ),
-      surface: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SectionHeader(title: s.sourcesSection),
-          _SourceGrid(onSelect: _browseType),
-          const SizedBox(height: JaraSpacing.xxl),
-          SectionHeader(title: s.recentSearches),
-          _RecentSearches(onPick: _runSearch),
-          const SizedBox(height: JaraSpacing.xxl),
-          SectionHeader(
-            title: s.recentlySaved,
-            actionLabel: s.seeAll,
-            onAction: () => context.go('/memory'),
-          ),
-          const _RecentlySaved(),
-        ],
+      surface: _pageColumn(
+        w,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SectionHeader(title: s.sourcesSection),
+            _SourceGrid(onSelect: _browseType),
+            const SizedBox(height: JaraSpacing.xxl),
+            SectionHeader(title: s.recentSearches),
+            _RecentSearches(onPick: _runSearch),
+            const SizedBox(height: JaraSpacing.xxl),
+            SectionHeader(
+              title: s.recentlySaved,
+              actionLabel: s.seeAll,
+              onAction: () => context.go('/memory'),
+            ),
+            const _RecentlySaved(),
+          ],
+        ),
       ),
     );
   }
@@ -295,32 +370,63 @@ class _SourceGrid extends ConsumerWidget {
 
   final ValueChanged<MemoryType> onSelect;
 
+  static const _gap = 14.0;
+
+  /// Tiles gain neighbours, not size: 160 is the ceiling a tile reaches
+  /// before the grid stops growing and the window gains margin instead.
+  static const _maxTile = 160.0;
+
+  /// Under this the icon badge + two label lines stop fitting the square.
+  static const _minTile = 96.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(memoryRevisionProvider);
     final s = ref.strings;
     final repo = ref.watch(memoryRepositoryProvider);
+    final w = context.windowClass;
 
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      // Neu shadows fall outside the tile box; the grid must not clip them.
-      clipBehavior: Clip.none,
-      crossAxisCount: 3,
-      mainAxisSpacing: 14,
-      crossAxisSpacing: 14,
-      childAspectRatio: 0.98,
-      children: [
-        for (final (type, ext) in _sourceTiles)
-          NeuTile(
-            icon: type.icon,
-            iconColor: type.color,
-            label: s.typePluralLabel(type),
-            meta: '${repo.countOf(type)} · $ext',
-            onTap: () => onSelect(type),
+    Widget grid(int columns) => GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          // Neu shadows fall outside the tile box; the grid must not clip
+          // them.
+          clipBehavior: Clip.none,
+          crossAxisCount: columns,
+          mainAxisSpacing: _gap,
+          crossAxisSpacing: _gap,
+          childAspectRatio: 0.98,
+          children: [
+            for (final (type, ext) in _sourceTiles)
+              NeuTile(
+                icon: type.icon,
+                iconColor: type.color,
+                label: s.typePluralLabel(type),
+                meta: '${repo.countOf(type)} · $ext',
+                onTap: () => onSelect(type),
+              ),
+          ],
+        );
+
+    if (w.isPhone) return grid(JaraBreakpoints.gridColumnsFor(w));
+
+    return LayoutBuilder(
+      builder: (context, c) {
+        // The window class asks for the columns; a narrow pane (the
+        // Horizon splits vertically up here) steps them back down.
+        final fits = ((c.maxWidth + _gap) / (_minTile + _gap)).floor();
+        final wanted = JaraBreakpoints.gridColumnsFor(w);
+        final columns = wanted < fits ? wanted : (fits < 1 ? 1 : fits);
+        return Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+                maxWidth: columns * _maxTile + (columns - 1) * _gap),
+            child: grid(columns),
           ),
-      ],
+        );
+      },
     );
   }
 }
@@ -367,20 +473,29 @@ class _RecentlySaved extends ConsumerWidget {
     ref.watch(memoryRevisionProvider);
     final s = ref.strings;
     final items = ref.watch(memoryRepositoryProvider).recentlySaved(limit: 3);
+    final w = context.windowClass;
+
+    Widget card(int i) => StaggeredItem(
+          index: i,
+          child: UniversalResultCard(
+            item: items[i],
+            dateLabel: relativeDate(s, items[i].date),
+            onTap: () => context.push('/item/${items[i].id}'),
+          ),
+        );
+
+    // Two-up from `expanded`: three full-bleed cards under a source grid
+    // read as a wall of whitespace on a desktop window.
+    if (w.usesTwoPane) {
+      return _cardGrid([for (var i = 0; i < items.length; i++) card(i)], 2);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var i = 0; i < items.length; i++) ...[
           if (i > 0) const SizedBox(height: JaraSpacing.md),
-          StaggeredItem(
-            index: i,
-            child: UniversalResultCard(
-              item: items[i],
-              dateLabel: relativeDate(s, items[i].date),
-              onTap: () => context.push('/item/${items[i].id}'),
-            ),
-          ),
+          card(i),
         ],
       ],
     );

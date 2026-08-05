@@ -135,6 +135,21 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
     final items = day == null
         ? base
         : base.where((item) => _sameDay(item.date, day)).toList();
+    final w = context.windowClass;
+    final inset = JaraBreakpoints.pageInsetFor(w);
+
+    final cards = [
+      for (var i = 0; i < items.length; i++)
+        StaggeredItem(
+          index: i,
+          child: UniversalResultCard(
+            item: items[i],
+            dateLabel: relativeDate(s, items[i].date),
+            onTap: () => context.push('/item/${items[i].id}'),
+            onPin: () => _togglePin(items[i].id),
+          ),
+        ),
+    ];
 
     final surface = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,18 +171,22 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
           ],
         ),
         const SizedBox(height: JaraSpacing.sm),
-        Row(
-          children: [
-            _StatCard(value: '${stats.totalItems}', label: s.memoryAll),
-            const SizedBox(width: 10),
-            _StatCard(
-              value: '+${stats.addedThisWeek}',
-              label: s.memoryRecent,
-              accent: true,
-            ),
-            const SizedBox(width: 10),
-            _StatCard(value: '${stats.collections}', label: s.collectionsTitle),
-          ],
+        _statStrip(
+          w,
+          Row(
+            children: [
+              _StatCard(value: '${stats.totalItems}', label: s.memoryAll),
+              const SizedBox(width: 10),
+              _StatCard(
+                value: '+${stats.addedThisWeek}',
+                label: s.memoryRecent,
+                accent: true,
+              ),
+              const SizedBox(width: 10),
+              _StatCard(
+                  value: '${stats.collections}', label: s.collectionsTitle),
+            ],
+          ),
         ),
         const SizedBox(height: JaraSpacing.xl),
         SizedBox(
@@ -220,18 +239,14 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
               onPrimary: () => showAddSheet(context),
             ),
           )
+        // The library is the longest list in the app; from `expanded` two
+        // columns roughly halve the scroll without shrinking a card.
+        else if (w.usesTwoPane)
+          SizedBox(width: double.infinity, child: _cardGrid(cards, 2))
         else
-          for (var i = 0; i < items.length; i++) ...[
-            StaggeredItem(
-              index: i,
-              child: UniversalResultCard(
-                item: items[i],
-                dateLabel: relativeDate(s, items[i].date),
-                onTap: () => context.push('/item/${items[i].id}'),
-                onPin: () => _togglePin(items[i].id),
-              ),
-            ),
-            if (i != items.length - 1) const SizedBox(height: JaraSpacing.md),
+          for (var i = 0; i < cards.length; i++) ...[
+            cards[i],
+            if (i != cards.length - 1) const SizedBox(height: JaraSpacing.md),
           ],
       ],
     );
@@ -269,13 +284,14 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
 
     return HorizonScaffold(
       inverted: true,
-      // Sky is the last panel here — clear the floating bottom bar.
-      skyPadding: const EdgeInsets.fromLTRB(
-          JaraSpacing.page, JaraSpacing.sm, JaraSpacing.page, 140),
-      surfacePadding: const EdgeInsets.fromLTRB(
-          JaraSpacing.page, JaraSpacing.sm, JaraSpacing.page, 0),
-      sky: sky,
-      surface: surface,
+      // Sky is the last panel here — clear the floating bottom bar. From
+      // `medium` up that bar is a rail, so the clearance is just a gap.
+      skyPadding: EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset,
+          w.usesRail ? JaraSpacing.huge : 140),
+      surfacePadding:
+          EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset, 0),
+      sky: _pageColumn(w, sky),
+      surface: _pageColumn(w, surface),
     );
   }
 }

@@ -378,7 +378,7 @@ class JaraStringsId extends JaraStrings {
         JaraError.noConnection =>
           'Memori di perangkatmu tetap berfungsi. Fitur cloud akan aktif lagi secara otomatis.',
         JaraError.localModelNotReady =>
-          'Pencarian di perangkat sedang menyelesaikan penyiapan. Ini perlu waktu sebentar saat pertama kali dijalankan.',
+          'Pencarian di perangkat sedang menyelesaikan penyiapan. Ini perlu waktu sebentar di awal.',
         JaraError.storageFull =>
           'Kosongkan sedikit ruang, lalu JARA bisa menyelesaikan pengindeksan.',
         JaraError.sourceMissing =>

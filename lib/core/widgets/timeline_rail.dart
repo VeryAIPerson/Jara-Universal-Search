@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design/breakpoints.dart';
 import '../design/haptics.dart';
 import '../design/jara_theme.dart';
 import '../design/motion.dart';
@@ -25,14 +26,22 @@ class TimelineRail extends StatelessWidget {
   final Map<DateTime, int> counts;
   final double height;
 
+  static const double _gap = 10;
+
+  /// A day reads as a bar; much past this it is a slab and the rail
+  /// turns into a bar chart. Applied by capping the rail's total width,
+  /// so the columns keep dividing the space exactly as they do today.
+  static const double _maxColumnWidth = 56;
+
   bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
     final maxCount = counts.values.fold<int>(1, (m, c) => c > m ? c : m);
+    final w = context.windowClass;
 
-    return SizedBox(
+    final rail = SizedBox(
       height: height,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -52,9 +61,23 @@ class TimelineRail extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: _gap),
           ],
         ],
+      ),
+    );
+
+    // Phones and watches keep the proportional rail untouched, whatever
+    // the day count. Wider windows hold it to its natural size and let
+    // the extra room fall on the trailing side.
+    if (w.isPhone || w.isWatch || days.isEmpty) return rail;
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: days.length * (_maxColumnWidth + _gap),
+        ),
+        child: rail,
       ),
     );
   }

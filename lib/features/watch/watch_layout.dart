@@ -174,6 +174,35 @@ class WatchScrollView extends StatelessWidget {
   }
 }
 
+/// Wear dismisses a surface with a swipe from the bezel inwards. Flutter
+/// only receives that as a back event on devices that route it as one, so
+/// watch screens carry the gesture explicitly. Mirrored under RTL.
+class WatchDismissible extends StatelessWidget {
+  const WatchDismissible({
+    super.key,
+    required this.child,
+    required this.onDismiss,
+  });
+
+  static const double _minVelocity = 240;
+
+  final Widget child;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    return GestureDetector(
+      excludeFromSemantics: true,
+      onHorizontalDragEnd: (d) {
+        final v = d.primaryVelocity ?? 0;
+        if (rtl ? v < -_minVelocity : v > _minVelocity) onDismiss();
+      },
+      child: child,
+    );
+  }
+}
+
 /// Top and bottom fade to the ground colour. On an OLED face the ground
 /// is black, so this costs no light and reads as the content simply
 /// running out under the bezel.

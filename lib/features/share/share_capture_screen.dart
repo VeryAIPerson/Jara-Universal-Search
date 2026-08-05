@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/haptics.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/motion.dart';
@@ -68,6 +69,11 @@ class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
     final t = context.jara;
     final s = ref.strings;
     final collections = ref.watch(memoryRepositoryProvider).collections;
+    final w = context.windowClass;
+    final inset = JaraBreakpoints.pageInsetFor(w);
+    // The capture card is a form, not a page: it grows a little off the
+    // phone and stops well short of the 680 reading cap.
+    final cardWidth = w.isPhone ? 380.0 : 460.0;
 
     return Scaffold(
       backgroundColor: t.surface,
@@ -75,13 +81,13 @@ class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
-              JaraSpacing.page,
+              inset,
               JaraSpacing.xl,
-              JaraSpacing.page,
+              inset,
               JaraSpacing.xl + MediaQuery.viewInsetsOf(context).bottom,
             ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 380),
+              constraints: BoxConstraints(maxWidth: cardWidth),
               child: NeuCard(
                 padding: const EdgeInsets.all(JaraSpacing.xl),
                 radius: JaraRadius.sheet,

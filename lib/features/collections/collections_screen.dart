@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/tokens.dart';
 import '../../core/design/typography.dart';
@@ -13,10 +14,29 @@ import '../../core/widgets/jara_search_field.dart';
 import '../../core/widgets/neu_card.dart';
 import '../../core/widgets/state_views.dart';
 
+/// Query block cap: a search field the width of a monitor is a bug.
+Widget _queryColumn(WindowClass w, Widget child) => w.isPhone
+    ? child
+    : Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
+          child: child,
+        ),
+      );
+
 /// Collections tab — sky holds the title and a shortcut back into search,
 /// the surface holds the collection grid.
 class CollectionsScreen extends ConsumerWidget {
   const CollectionsScreen({super.key});
+
+  static const _gap = 14.0;
+
+  /// A collection card carries a name, a count and a date — past this it
+  /// only gets emptier, so the grid takes another column instead.
+  static const _maxCard = 240.0;
+  static const _minCard = 150.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,53 +47,81 @@ class CollectionsScreen extends ConsumerWidget {
     final collections = repo.collections;
     final totalItems =
         collections.fold<int>(0, (sum, c) => sum + c.itemCount);
+    final w = context.windowClass;
+    final inset = JaraBreakpoints.pageInsetFor(w);
+
+    Widget grid(int columns) => GridView.builder(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            mainAxisSpacing: _gap,
+            crossAxisSpacing: _gap,
+            childAspectRatio: 1.08,
+          ),
+          itemCount: collections.length,
+          itemBuilder: (context, index) => StaggeredItem(
+            index: index,
+            child: _CollectionCard(
+              collection: collections[index],
+              itemsLabel: s.collectionItems(collections[index].itemCount),
+              updatedLabel: relativeDate(s, collections[index].updated),
+            ),
+          ),
+        );
 
     return HorizonScaffold(
-      skyPadding: const EdgeInsets.fromLTRB(
-          JaraSpacing.page, JaraSpacing.sm, JaraSpacing.page, 96),
-      surfacePadding: const EdgeInsets.fromLTRB(
-          JaraSpacing.page, JaraSpacing.lg, JaraSpacing.page, 130),
-      sky: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            s.collectionsTitle,
-            style: JaraType.title1.copyWith(color: t.textOnSky),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            s.collectionItems(totalItems),
-            style: JaraType.caption.copyWith(color: t.textOnSkySecondary),
-          ),
-          const SizedBox(height: JaraSpacing.lg),
-          JaraSearchField(
-            readOnly: true,
-            hero: false,
-            hints: [s.searchHints.first],
-            onTap: () => context.go('/search'),
-          ),
-        ],
-      ),
-      surface: GridView.builder(
-        padding: EdgeInsets.zero,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 14,
-          crossAxisSpacing: 14,
-          childAspectRatio: 1.08,
-        ),
-        itemCount: collections.length,
-        itemBuilder: (context, index) => StaggeredItem(
-          index: index,
-          child: _CollectionCard(
-            collection: collections[index],
-            itemsLabel: s.collectionItems(collections[index].itemCount),
-            updatedLabel: relativeDate(s, collections[index].updated),
-          ),
+      skyPadding:
+          EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset, 96),
+      surfacePadding: EdgeInsets.fromLTRB(inset, JaraSpacing.lg, inset,
+          w.usesRail ? JaraSpacing.xxxl : 130),
+      sky: _queryColumn(
+        w,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              s.collectionsTitle,
+              style: JaraType.title1.copyWith(color: t.textOnSky),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              s.collectionItems(totalItems),
+              style: JaraType.caption.copyWith(color: t.textOnSkySecondary),
+            ),
+            const SizedBox(height: JaraSpacing.lg),
+            JaraSearchField(
+              readOnly: true,
+              hero: false,
+              hints: [s.searchHints.first],
+              onTap: () => context.go('/search'),
+            ),
+          ],
         ),
       ),
+      // Collections run one column behind the source tiles (2/3/4/5): the
+      // card is twice a tile's content, so it needs twice its width.
+      surface: w.isPhone
+          ? grid(2)
+          : LayoutBuilder(
+              builder: (context, c) {
+                final fits =
+                    ((c.maxWidth + _gap) / (_minCard + _gap)).floor();
+                final wanted =
+                    (JaraBreakpoints.gridColumnsFor(w) - 1).clamp(1, 5);
+                final columns =
+                    wanted < fits ? wanted : (fits < 1 ? 1 : fits);
+                return Align(
+                  alignment: AlignmentDirectional.topStart,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                        maxWidth: columns * _maxCard + (columns - 1) * _gap),
+                    child: grid(columns),
+                  ),
+                );
+              },
+            ),
     );
   }
 }

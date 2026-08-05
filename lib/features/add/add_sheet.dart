@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/haptics.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/motion.dart';
@@ -19,7 +20,26 @@ import '../../core/widgets/state_views.dart';
 /// Opens the "Add to JARA" capture sheet — the center-FAB action shared by
 /// every shell tab. Two-step flow: pick a capture kind, review the mocked
 /// auto-enrichment, land on a success beat with a "search it now" shortcut.
+///
+/// A sheet that rises to the thumb only makes sense where the thumb is.
+/// From `medium` up the same flow presents as a centred dialog surface,
+/// which also keeps the review step inside a readable column.
 Future<void> showAddSheet(BuildContext context) {
+  if (JaraBreakpoints.of(context).usesRail) {
+    return showDialog<void>(
+      context: context,
+      barrierColor: context.jara.scrim,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(JaraSpacing.xxl),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _dialogMaxWidth),
+          child: const _AddSheet(dialog: true),
+        ),
+      ),
+    );
+  }
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -28,6 +48,10 @@ Future<void> showAddSheet(BuildContext context) {
     builder: (context) => const _AddSheet(),
   );
 }
+
+/// Well under `proseMaxWidth`, so the review step's fields and chips never
+/// stretch past a readable line.
+const double _dialogMaxWidth = 520;
 
 enum _AddStep { options, details, success }
 
@@ -114,7 +138,10 @@ List<_AddOption> _captureOptions(JaraStrings s) => [
     ];
 
 class _AddSheet extends ConsumerStatefulWidget {
-  const _AddSheet();
+  const _AddSheet({this.dialog = false});
+
+  /// Dialog form: rounded on all four corners, no drag handle.
+  final bool dialog;
 
   @override
   ConsumerState<_AddSheet> createState() => _AddSheetState();
@@ -188,6 +215,8 @@ class _AddSheetState extends ConsumerState<_AddSheet> {
     final t = context.jara;
     final s = ref.strings;
 
+    final dialog = widget.dialog;
+
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * 0.9,
@@ -195,14 +224,16 @@ class _AddSheetState extends ConsumerState<_AddSheet> {
       child: Container(
         decoration: BoxDecoration(
           color: t.surfaceElevated,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(JaraRadius.sheet),
-          ),
+          borderRadius: dialog
+              ? BorderRadius.circular(JaraRadius.sheet)
+              : const BorderRadius.vertical(
+                  top: Radius.circular(JaraRadius.sheet),
+                ),
         ),
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
             JaraSpacing.xl,
-            JaraSpacing.md,
+            dialog ? JaraSpacing.xl : JaraSpacing.md,
             JaraSpacing.xl,
             JaraSpacing.xl + MediaQuery.viewInsetsOf(context).bottom,
           ),
@@ -210,17 +241,19 @@ class _AddSheetState extends ConsumerState<_AddSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: t.border,
-                    borderRadius: BorderRadius.circular(2),
+              if (!dialog) ...[
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: t.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: JaraSpacing.lg),
+                const SizedBox(height: JaraSpacing.lg),
+              ],
               AnimatedSwitcher(
                 duration: JaraMotion.of(context, JaraMotion.base),
                 switchInCurve: JaraMotion.standard,
@@ -248,18 +281,16 @@ class _AddSheetState extends ConsumerState<_AddSheet> {
     );
   }
 
+  /// Under this a tile stops fitting its icon badge plus label.
+  static const double _minTile = 96;
+
   Widget _buildOptions(JaraTokens t, JaraStrings s) {
-    return Column(
-      key: const ValueKey(_AddStep.options),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(s.addTitle, style: JaraType.title2.copyWith(color: t.textPrimary)),
-        const SizedBox(height: JaraSpacing.xl),
-        GridView.count(
+    final w = context.windowClass;
+
+    Widget grid(int columns) => GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 3,
+          crossAxisCount: columns,
           mainAxisSpacing: JaraSpacing.md,
           crossAxisSpacing: JaraSpacing.md,
           childAspectRatio: 0.95,
@@ -272,7 +303,28 @@ class _AddSheetState extends ConsumerState<_AddSheet> {
                 onTap: () => _pick(option),
               ),
           ],
-        ),
+        );
+
+    return Column(
+      key: const ValueKey(_AddStep.options),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(s.addTitle, style: JaraType.title2.copyWith(color: t.textPrimary)),
+        const SizedBox(height: JaraSpacing.xl),
+        if (w.isPhone)
+          grid(JaraBreakpoints.gridColumnsFor(w))
+        else
+          // The window class asks for the columns, the dialog's own width
+          // gives them back: 520 fits four tiles, never six.
+          LayoutBuilder(
+            builder: (context, c) {
+              const gap = JaraSpacing.md;
+              final fits = ((c.maxWidth + gap) / (_minTile + gap)).floor();
+              final wanted = JaraBreakpoints.gridColumnsFor(w);
+              return grid(wanted < fits ? wanted : (fits < 1 ? 1 : fits));
+            },
+          ),
       ],
     );
   }

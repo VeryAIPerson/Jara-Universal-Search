@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design/breakpoints.dart';
 import '../design/jara_theme.dart';
 import '../design/tokens.dart';
 import '../design/typography.dart';
@@ -39,6 +40,89 @@ class UniversalResultCard extends StatelessWidget {
     final secondary = onSky ? t.textOnSkySecondary : t.textSecondary;
     final tertiary = onSky ? t.textOnSkyTertiary : t.textTertiary;
 
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text.rich(
+                highlightSpans(
+                  item.title,
+                  query,
+                  style: JaraType.headline.copyWith(color: titleColor),
+                  highlightStyle:
+                      JaraType.headline.copyWith(color: t.accentBright),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (onPin != null)
+              Pressable(
+                onTap: onPin,
+                semanticLabel: item.pinned ? 'Unpin' : 'Pin',
+                // Hit box grows to the 44pt minimum (nested inside the
+                // card's own Pressable, so it wins taps within its
+                // bounds and the card tap still owns the rest).
+                minHitSize: JaraSize.touchMin,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 6),
+                  child: Icon(
+                    item.pinned
+                        ? Icons.push_pin_rounded
+                        : Icons.push_pin_outlined,
+                    size: 16,
+                    color: item.pinned ? t.gold : tertiary,
+                  ),
+                ),
+              )
+            else if (item.pinned)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 6),
+                child:
+                    Icon(Icons.push_pin_rounded, size: 14, color: t.gold),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text.rich(
+          highlightSpans(
+            item.snippet,
+            query,
+            style: JaraType.footnote.copyWith(color: secondary),
+            highlightStyle:
+                JaraType.footnoteMedium.copyWith(color: titleColor),
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Icon(item.type.icon, size: 12, color: tertiary),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                [
+                  item.source,
+                  if (dateLabel != null) dateLabel!,
+                  if (item.pageLabel != null) item.pageLabel!,
+                  if (item.timeLabel != null) item.timeLabel!,
+                ].join(' · '),
+                style: JaraType.caption.copyWith(color: tertiary),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Spacer(),
+            if (item.matchReason != null)
+              JaraChip(label: item.matchReason!, color: t.violet),
+          ],
+        ),
+      ],
+    );
+
     return NeuCard(
       onSky: onSky,
       onTap: onTap,
@@ -50,91 +134,19 @@ class UniversalResultCard extends StatelessWidget {
           _LeadingBlock(item: item),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text.rich(
-                        highlightSpans(
-                          item.title,
-                          query,
-                          style: JaraType.headline.copyWith(color: titleColor),
-                          highlightStyle: JaraType.headline
-                              .copyWith(color: t.accentBright),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (onPin != null)
-                      Pressable(
-                        onTap: onPin,
-                        semanticLabel: item.pinned ? 'Unpin' : 'Pin',
-                        // Hit box grows to the 44pt minimum (nested inside
-                        // the card's own Pressable, so it wins taps within
-                        // its bounds and the card tap still owns the rest).
-                        minHitSize: JaraSize.touchMin,
-                        child: Padding(
-                          padding:
-                              const EdgeInsetsDirectional.only(start: 6),
-                          child: Icon(
-                            item.pinned
-                                ? Icons.push_pin_rounded
-                                : Icons.push_pin_outlined,
-                            size: 16,
-                            color: item.pinned ? t.gold : tertiary,
-                          ),
-                        ),
-                      )
-                    else if (item.pinned)
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(start: 6),
-                        child: Icon(Icons.push_pin_rounded,
-                            size: 14, color: t.gold),
-                      ),
-                  ],
+            // The card itself may be as wide as a desktop pane; the text
+            // block inside it stops at reading width. heightFactor keeps
+            // the Align shrink-wrapped, and below that width the
+            // constraint never binds — the column measures identically.
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              heightFactor: 1,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: JaraBreakpoints.proseMaxWidth,
                 ),
-                const SizedBox(height: 4),
-                Text.rich(
-                  highlightSpans(
-                    item.snippet,
-                    query,
-                    style: JaraType.footnote.copyWith(color: secondary),
-                    highlightStyle: JaraType.footnoteMedium
-                        .copyWith(color: titleColor),
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(item.type.icon, size: 12, color: tertiary),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        [
-                          item.source,
-                          if (dateLabel != null) dateLabel!,
-                          if (item.pageLabel != null) item.pageLabel!,
-                          if (item.timeLabel != null) item.timeLabel!,
-                        ].join(' · '),
-                        style: JaraType.caption.copyWith(color: tertiary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (item.matchReason != null)
-                      JaraChip(
-                        label: item.matchReason!,
-                        color: t.violet,
-                      ),
-                  ],
-                ),
-              ],
+                child: body,
+              ),
             ),
           ),
         ],
@@ -196,9 +208,11 @@ class _LeadingBlock extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
+                    // Directional so the light keeps coming from where
+                    // the reader starts; identical to topLeft in LTR.
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                       colors: [
                         color.withValues(alpha: 0.35),
                         color.withValues(alpha: 0.1),

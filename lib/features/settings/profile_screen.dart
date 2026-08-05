@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/haptics.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/tokens.dart';
@@ -18,6 +19,18 @@ import '../../core/widgets/notch_app_bar.dart';
 /// their text and the group reads as one segmented row, wrapping to a
 /// second line only if it genuinely can't fit (large text scale).
 Widget _segmented(Widget chip) => IntrinsicWidth(child: chip);
+
+/// A settings list is a form: a 1400 dp row with a 60 dp label in it is a
+/// bug, so the column caps and centres. Phones fall through untouched.
+Widget _formColumn(WindowClass w, Widget child) => w.isPhone
+    ? child
+    : Center(
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
+          child: child,
+        ),
+      );
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -50,128 +63,133 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
     final stats = ref.watch(memoryStatsProvider);
+    final w = context.windowClass;
+    final inset = JaraBreakpoints.pageInsetFor(w);
 
     return Scaffold(
       backgroundColor: t.surface,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            JaraSpacing.page, JaraSpacing.sm, JaraSpacing.page, 140),
-          children: [
-            Text(s.settingsTitle, style: JaraType.title1.copyWith(color: t.textPrimary)),
-            const SizedBox(height: JaraSpacing.lg),
-            _identityCard(t, s),
-            const SizedBox(height: JaraSpacing.xl),
-            _premiumCard(t, s),
-            const SizedBox(height: JaraSpacing.xxl),
-            SectionHeader(title: s.settingsTheme),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _segmented(SearchFilterChip(
-                  label: s.settingsThemeDark,
-                  selected: themeMode == ThemeMode.dark,
-                  onSky: false,
-                  onTap: () =>
-                      ref.read(themeModeProvider.notifier).state = ThemeMode.dark,
-                )),
-                _segmented(SearchFilterChip(
-                  label: s.settingsThemeLight,
-                  selected: themeMode == ThemeMode.light,
-                  onSky: false,
-                  onTap: () =>
-                      ref.read(themeModeProvider.notifier).state = ThemeMode.light,
-                )),
-                _segmented(SearchFilterChip(
-                  label: s.settingsThemeSystem,
-                  selected: themeMode == ThemeMode.system,
-                  onSky: false,
-                  onTap: () =>
-                      ref.read(themeModeProvider.notifier).state = ThemeMode.system,
-                )),
-              ],
-            ),
-            const SizedBox(height: JaraSpacing.lg),
-            SectionHeader(title: s.settingsLanguage),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _segmented(SearchFilterChip(
-                  label: 'English',
-                  selected: locale.languageCode == 'en',
-                  onSky: false,
-                  onTap: () =>
-                      ref.read(localeProvider.notifier).state = const Locale('en'),
-                )),
-                _segmented(SearchFilterChip(
-                  label: 'Türkçe',
-                  selected: locale.languageCode == 'tr',
-                  onSky: false,
-                  onTap: () =>
-                      ref.read(localeProvider.notifier).state = const Locale('tr'),
-                )),
-              ],
-            ),
-            const SizedBox(height: JaraSpacing.xxl),
-            SectionHeader(title: s.sectionGeneral),
-            _SettingsTile(
-              icon: Icons.hub_outlined,
-              label: s.settingsConnectedAccounts,
-              onTap: () => context.push('/profile/connections'),
-            ),
-            const SizedBox(height: 10),
-            _SettingsTile(
-              icon: Icons.shield_outlined,
-              label: s.settingsPrivacySecurity,
-              onTap: () => context.push('/profile/privacy'),
-            ),
-            const SizedBox(height: 10),
-            _SettingsTile(
-              icon: Icons.manage_search_rounded,
-              label: s.settingsSearchSources,
-              onTap: () => _snack(s.settingsSearchSources),
-            ),
-            const SizedBox(height: 10),
-            _SettingsTile(
-              icon: Icons.mic_none_rounded,
-              label: s.settingsVoice,
-              trailing: Semantics(
+        child: _formColumn(
+          w,
+          ListView(
+            padding: EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset,
+                w.usesRail ? JaraSpacing.xxxl : 140),
+            children: [
+              Text(s.settingsTitle, style: JaraType.title1.copyWith(color: t.textPrimary)),
+              const SizedBox(height: JaraSpacing.lg),
+              _identityCard(t, s),
+              const SizedBox(height: JaraSpacing.xl),
+              _premiumCard(t, s),
+              const SizedBox(height: JaraSpacing.xxl),
+              SectionHeader(title: s.settingsTheme),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _segmented(SearchFilterChip(
+                    label: s.settingsThemeDark,
+                    selected: themeMode == ThemeMode.dark,
+                    onSky: false,
+                    onTap: () =>
+                        ref.read(themeModeProvider.notifier).state = ThemeMode.dark,
+                  )),
+                  _segmented(SearchFilterChip(
+                    label: s.settingsThemeLight,
+                    selected: themeMode == ThemeMode.light,
+                    onSky: false,
+                    onTap: () =>
+                        ref.read(themeModeProvider.notifier).state = ThemeMode.light,
+                  )),
+                  _segmented(SearchFilterChip(
+                    label: s.settingsThemeSystem,
+                    selected: themeMode == ThemeMode.system,
+                    onSky: false,
+                    onTap: () =>
+                        ref.read(themeModeProvider.notifier).state = ThemeMode.system,
+                  )),
+                ],
+              ),
+              const SizedBox(height: JaraSpacing.lg),
+              SectionHeader(title: s.settingsLanguage),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _segmented(SearchFilterChip(
+                    label: 'English',
+                    selected: locale.languageCode == 'en',
+                    onSky: false,
+                    onTap: () =>
+                        ref.read(localeProvider.notifier).state = const Locale('en'),
+                  )),
+                  _segmented(SearchFilterChip(
+                    label: 'Türkçe',
+                    selected: locale.languageCode == 'tr',
+                    onSky: false,
+                    onTap: () =>
+                        ref.read(localeProvider.notifier).state = const Locale('tr'),
+                  )),
+                ],
+              ),
+              const SizedBox(height: JaraSpacing.xxl),
+              SectionHeader(title: s.sectionGeneral),
+              _SettingsTile(
+                icon: Icons.hub_outlined,
+                label: s.settingsConnectedAccounts,
+                onTap: () => context.push('/profile/connections'),
+              ),
+              const SizedBox(height: 10),
+              _SettingsTile(
+                icon: Icons.shield_outlined,
+                label: s.settingsPrivacySecurity,
+                onTap: () => context.push('/profile/privacy'),
+              ),
+              const SizedBox(height: 10),
+              _SettingsTile(
+                icon: Icons.manage_search_rounded,
+                label: s.settingsSearchSources,
+                onTap: () => _snack(s.settingsSearchSources),
+              ),
+              const SizedBox(height: 10),
+              _SettingsTile(
+                icon: Icons.mic_none_rounded,
                 label: s.settingsVoice,
-                child: Switch.adaptive(
-                  value: _voiceEnabled,
-                  activeThumbColor: t.accent,
-                  onChanged: (v) => setState(() => _voiceEnabled = v),
+                trailing: Semantics(
+                  label: s.settingsVoice,
+                  child: Switch.adaptive(
+                    value: _voiceEnabled,
+                    activeThumbColor: t.accent,
+                    onChanged: (v) => setState(() => _voiceEnabled = v),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            _SettingsTile(
-              icon: Icons.notifications_none_rounded,
-              label: s.settingsNotifications,
-              onTap: () => _snack(s.settingsNotifications),
-            ),
-            const SizedBox(height: 10),
-            _SettingsTile(
-              icon: Icons.donut_small_outlined,
-              label: s.settingsStorage,
-              onTap: () => _snack(stats.storageUsedLabel),
-            ),
-            const SizedBox(height: 10),
-            _SettingsTile(
-              icon: Icons.sync_rounded,
-              label: s.settingsIndexing,
-              onTap: () => _startReindex(s),
-            ),
-            const SizedBox(height: JaraSpacing.xxl),
-            Center(
-              child: Text(
-                '${s.appName} · 0.1.0',
-                style: JaraType.caption.copyWith(color: t.textTertiary),
+              const SizedBox(height: 10),
+              _SettingsTile(
+                icon: Icons.notifications_none_rounded,
+                label: s.settingsNotifications,
+                onTap: () => _snack(s.settingsNotifications),
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              _SettingsTile(
+                icon: Icons.donut_small_outlined,
+                label: s.settingsStorage,
+                onTap: () => _snack(stats.storageUsedLabel),
+              ),
+              const SizedBox(height: 10),
+              _SettingsTile(
+                icon: Icons.sync_rounded,
+                label: s.settingsIndexing,
+                onTap: () => _startReindex(s),
+              ),
+              const SizedBox(height: JaraSpacing.xxl),
+              Center(
+                child: Text(
+                  '${s.appName} · 0.1.0',
+                  style: JaraType.caption.copyWith(color: t.textTertiary),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

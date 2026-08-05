@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/haptics.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/tokens.dart';
@@ -16,6 +17,19 @@ import '../../core/widgets/result_cards.dart';
 import '../../core/widgets/state_views.dart';
 
 enum _DetailAction { saveToCollection, addTag, ask, delete }
+
+/// This screen is a reading column: title, meta, body, tags. Past ~680 the
+/// line length stops being readable, so wide windows gain margin instead.
+/// Phones fall through untouched — 390 was never near the cap.
+Widget _prose(WindowClass w, Widget child) => w.isPhone
+    ? child
+    : Center(
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
+          child: child,
+        ),
+      );
 
 /// Full memory detail — lives outside the shell, so it owns its own
 /// bottom action bar instead of the floating tab bar.
@@ -48,24 +62,22 @@ class ResultDetailScreen extends ConsumerWidget {
     MemoryItem item,
   ) async {
     final t = context.jara;
-    final action = await showModalBottomSheet<_DetailAction>(
-      context: context,
-      useSafeArea: true,
-      builder: (sheetContext) => SafeArea(
-        top: false,
-        child: Column(
+
+    Widget menu(BuildContext sheetContext, {required bool dialog}) => Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: JaraSpacing.md),
-            Container(
-              width: 42,
-              height: 4,
-              decoration: BoxDecoration(
-                color: t.textTertiary.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(2),
+            if (!dialog) ...[
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: t.textTertiary.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(height: JaraSpacing.sm),
+              const SizedBox(height: JaraSpacing.sm),
+            ],
             _SheetAction(
               icon: Icons.folder_rounded,
               label: s.actionSaveToCollection,
@@ -91,9 +103,34 @@ class ResultDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: JaraSpacing.md),
           ],
-        ),
-      ),
-    );
+        );
+
+    // Sheets reach for a thumb; from `medium` up there is none, so the
+    // same menu lands as a centred surface.
+    final action = JaraBreakpoints.of(context).usesRail
+        ? await showDialog<_DetailAction>(
+            context: context,
+            barrierColor: t.scrim,
+            builder: (dialogContext) => Dialog(
+              backgroundColor: t.surfaceElevated,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(JaraRadius.sheet),
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: menu(dialogContext, dialog: true),
+              ),
+            ),
+          )
+        : await showModalBottomSheet<_DetailAction>(
+            context: context,
+            useSafeArea: true,
+            builder: (sheetContext) => SafeArea(
+              top: false,
+              child: menu(sheetContext, dialog: false),
+            ),
+          );
     if (action == null || !context.mounted) return;
     switch (action) {
       case _DetailAction.saveToCollection:
@@ -161,6 +198,8 @@ class ResultDetailScreen extends ConsumerWidget {
     ref.watch(memoryRevisionProvider);
     final repo = ref.watch(memoryRepositoryProvider);
     final item = repo.byId(itemId);
+    final w = context.windowClass;
+    final inset = JaraBreakpoints.pageInsetFor(w);
 
     if (item == null) {
       return Scaffold(
@@ -206,214 +245,220 @@ class ResultDetailScreen extends ConsumerWidget {
       backgroundColor: t.surface,
       body: SafeArea(
         bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-              JaraSpacing.page, JaraSpacing.sm, JaraSpacing.page, 120),
-          children: [
-            Row(
-              children: [
-                NeuIconButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  semanticLabel: s.back,
-                  onTap: () => context.pop(),
-                ),
-                const Spacer(),
-                NeuIconButton(
-                  icon: Icons.ios_share_rounded,
-                  semanticLabel: s.actionShare,
-                  onTap: () => _snack(context, s.actionShare),
-                ),
-                const SizedBox(width: 10),
-                NeuIconButton(
-                  icon: item.pinned
-                      ? Icons.push_pin_rounded
-                      : Icons.push_pin_outlined,
-                  iconColor: item.pinned ? t.gold : null,
-                  semanticLabel: item.pinned ? s.actionUnpin : s.actionPin,
-                  onTap: () => _togglePin(ref),
-                ),
-                const SizedBox(width: 10),
-                NeuIconButton(
-                  icon: Icons.more_horiz_rounded,
-                  semanticLabel: s.moreActions,
-                  onTap: () => _showActions(context, ref, s, item),
-                ),
-              ],
-            ),
-            const SizedBox(height: JaraSpacing.xl),
-            _PreviewBlock(
-              item: item,
-              monthLabel: _months[item.date.month - 1],
-              onLongPress: () => _showActions(context, ref, s, item),
-            ),
-            const SizedBox(height: JaraSpacing.xl),
-            Text(
-              item.title,
-              style: JaraType.title1.copyWith(color: t.textPrimary),
-            ),
-            const SizedBox(height: JaraSpacing.sm),
-            Text(
-              meta,
-              style: JaraType.footnote.copyWith(color: t.textSecondary),
-            ),
-            const SizedBox(height: JaraSpacing.lg),
-            NeuCard(
-              child: Text(
-                item.snippet,
-                style: JaraType.body.copyWith(color: t.textPrimary),
+        child: _prose(
+          w,
+          ListView(
+            padding: EdgeInsets.fromLTRB(inset, JaraSpacing.sm, inset,
+                w.usesRail ? JaraSpacing.xl : 120),
+            children: [
+              Row(
+                children: [
+                  NeuIconButton(
+                    icon: Icons.arrow_back_ios_new_rounded,
+                    semanticLabel: s.back,
+                    onTap: () => context.pop(),
+                  ),
+                  const Spacer(),
+                  NeuIconButton(
+                    icon: Icons.ios_share_rounded,
+                    semanticLabel: s.actionShare,
+                    onTap: () => _snack(context, s.actionShare),
+                  ),
+                  const SizedBox(width: 10),
+                  NeuIconButton(
+                    icon: item.pinned
+                        ? Icons.push_pin_rounded
+                        : Icons.push_pin_outlined,
+                    iconColor: item.pinned ? t.gold : null,
+                    semanticLabel: item.pinned ? s.actionUnpin : s.actionPin,
+                    onTap: () => _togglePin(ref),
+                  ),
+                  const SizedBox(width: 10),
+                  NeuIconButton(
+                    icon: Icons.more_horiz_rounded,
+                    semanticLabel: s.moreActions,
+                    onTap: () => _showActions(context, ref, s, item),
+                  ),
+                ],
               ),
-            ),
-            if (item.matchReason != null) ...[
-              const SizedBox(height: JaraSpacing.md),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: JaraChip(
-                  label: item.matchReason!,
-                  icon: Icons.auto_awesome_rounded,
-                  color: t.violet,
+              const SizedBox(height: JaraSpacing.xl),
+              _PreviewBlock(
+                item: item,
+                monthLabel: _months[item.date.month - 1],
+                onLongPress: () => _showActions(context, ref, s, item),
+              ),
+              const SizedBox(height: JaraSpacing.xl),
+              Text(
+                item.title,
+                style: JaraType.title1.copyWith(color: t.textPrimary),
+              ),
+              const SizedBox(height: JaraSpacing.sm),
+              Text(
+                meta,
+                style: JaraType.footnote.copyWith(color: t.textSecondary),
+              ),
+              const SizedBox(height: JaraSpacing.lg),
+              NeuCard(
+                child: Text(
+                  item.snippet,
+                  style: JaraType.body.copyWith(color: t.textPrimary),
                 ),
               ),
-            ],
-            const SizedBox(height: JaraSpacing.xl),
-            SectionHeader(title: s.detailTags),
-            Wrap(
-              spacing: JaraSpacing.sm,
-              runSpacing: JaraSpacing.sm,
-              children: [
-                for (final tag in item.tags)
-                  JaraChip(label: tag, color: t.accent),
-                Semantics(
-                  button: true,
-                  label: s.actionAddTag,
+              if (item.matchReason != null) ...[
+                const SizedBox(height: JaraSpacing.md),
+                Align(
+                  alignment: Alignment.centerLeft,
                   child: JaraChip(
-                    label: '+ ${s.actionAddTag}',
-                    color: t.textTertiary,
-                    onTap: () => _snack(context, s.actionAddTag),
+                    label: item.matchReason!,
+                    icon: Icons.auto_awesome_rounded,
+                    color: t.violet,
                   ),
                 ),
               ],
-            ),
-            if (item.people.isNotEmpty) ...[
               const SizedBox(height: JaraSpacing.xl),
-              SectionHeader(title: s.detailPeople),
+              SectionHeader(title: s.detailTags),
               Wrap(
                 spacing: JaraSpacing.sm,
                 runSpacing: JaraSpacing.sm,
                 children: [
-                  for (final person in item.people)
-                    JaraChip(
-                      label: person,
-                      icon: Icons.person_outline_rounded,
-                      color: t.accentBright,
-                    ),
-                ],
-              ),
-            ],
-            if (collectionName != null) ...[
-              const SizedBox(height: JaraSpacing.xl),
-              SectionHeader(title: s.detailInCollection),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Semantics(
-                  button: true,
-                  label: collection?.name ?? collectionName,
-                  child: JaraChip(
-                    label: collection?.name ?? collectionName,
-                    icon: Icons.folder_rounded,
-                    color: collection?.color ?? t.accent,
-                    onTap: () => context.push(
-                      '/collections/${collection?.id ?? collectionName.toLowerCase()}',
+                  for (final tag in item.tags)
+                    JaraChip(label: tag, color: t.accent),
+                  Semantics(
+                    button: true,
+                    label: s.actionAddTag,
+                    child: JaraChip(
+                      label: '+ ${s.actionAddTag}',
+                      color: t.textTertiary,
+                      onTap: () => _snack(context, s.actionAddTag),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-            if (related.isNotEmpty) ...[
-              const SizedBox(height: JaraSpacing.xl),
-              SectionHeader(title: s.detailRelated),
-              for (var i = 0; i < related.length; i++) ...[
-                UniversalResultCard(
-                  item: related[i],
-                  dateLabel: relativeDate(s, related[i].date),
-                  onTap: () => context.push('/item/${related[i].id}'),
+              if (item.people.isNotEmpty) ...[
+                const SizedBox(height: JaraSpacing.xl),
+                SectionHeader(title: s.detailPeople),
+                Wrap(
+                  spacing: JaraSpacing.sm,
+                  runSpacing: JaraSpacing.sm,
+                  children: [
+                    for (final person in item.people)
+                      JaraChip(
+                        label: person,
+                        icon: Icons.person_outline_rounded,
+                        color: t.accentBright,
+                      ),
+                  ],
                 ),
-                if (i != related.length - 1)
-                  const SizedBox(height: JaraSpacing.md),
               ],
-            ],
-            const SizedBox(height: JaraSpacing.xl),
-            NeuCard(
-              semanticLabel: s.actionAskJara,
-              onTap: () => _snack(context, s.actionAskJara),
-              child: Row(
-                children: [
-                  Icon(Icons.auto_awesome_rounded, color: t.gold, size: 18),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      s.detailAskPlaceholder,
-                      style: JaraType.callout.copyWith(color: t.textTertiary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              if (collectionName != null) ...[
+                const SizedBox(height: JaraSpacing.xl),
+                SectionHeader(title: s.detailInCollection),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Semantics(
+                    button: true,
+                    label: collection?.name ?? collectionName,
+                    child: JaraChip(
+                      label: collection?.name ?? collectionName,
+                      icon: Icons.folder_rounded,
+                      color: collection?.color ?? t.accent,
+                      onTap: () => context.push(
+                        '/collections/${collection?.id ?? collectionName.toLowerCase()}',
+                      ),
                     ),
                   ),
-                  const SizedBox(width: JaraSpacing.sm),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      gradient: t.accentGradient,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_upward_rounded,
-                      color: Colors.white,
-                      size: 18,
-                    ),
+                ),
+              ],
+              if (related.isNotEmpty) ...[
+                const SizedBox(height: JaraSpacing.xl),
+                SectionHeader(title: s.detailRelated),
+                for (var i = 0; i < related.length; i++) ...[
+                  UniversalResultCard(
+                    item: related[i],
+                    dateLabel: relativeDate(s, related[i].date),
+                    onTap: () => context.push('/item/${related[i].id}'),
                   ),
+                  if (i != related.length - 1)
+                    const SizedBox(height: JaraSpacing.md),
                 ],
+              ],
+              const SizedBox(height: JaraSpacing.xl),
+              NeuCard(
+                semanticLabel: s.actionAskJara,
+                onTap: () => _snack(context, s.actionAskJara),
+                child: Row(
+                  children: [
+                    Icon(Icons.auto_awesome_rounded, color: t.gold, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        s.detailAskPlaceholder,
+                        style: JaraType.callout.copyWith(color: t.textTertiary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: JaraSpacing.sm),
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        gradient: t.accentGradient,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_upward_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(JaraSpacing.lg),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final share = JaraSoftButton(
-                label: s.actionShare,
-                icon: Icons.ios_share_rounded,
-                expanded: true,
-                onTap: () => _snack(context, s.actionShare),
-              );
-              final open = JaraButton(
-                label: s.actionOpenOriginal,
-                icon: Icons.open_in_new_rounded,
-                expanded: true,
-                onTap: () => _snack(context, s.actionOpenOriginal),
-              );
-              // Narrow screens stack instead of squeezing the labels.
-              if (constraints.maxWidth < 340) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
+        child: _prose(
+          w,
+          Padding(
+            padding: const EdgeInsets.all(JaraSpacing.lg),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final share = JaraSoftButton(
+                  label: s.actionShare,
+                  icon: Icons.ios_share_rounded,
+                  expanded: true,
+                  onTap: () => _snack(context, s.actionShare),
+                );
+                final open = JaraButton(
+                  label: s.actionOpenOriginal,
+                  icon: Icons.open_in_new_rounded,
+                  expanded: true,
+                  onTap: () => _snack(context, s.actionOpenOriginal),
+                );
+                // Narrow screens stack instead of squeezing the labels.
+                if (constraints.maxWidth < 340) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      open,
+                      const SizedBox(height: JaraSpacing.md),
+                      share,
+                    ],
+                  );
+                }
+                return Row(
                   children: [
-                    open,
-                    const SizedBox(height: JaraSpacing.md),
-                    share,
+                    Expanded(flex: 4, child: share),
+                    const SizedBox(width: JaraSpacing.md),
+                    Expanded(flex: 6, child: open),
                   ],
                 );
-              }
-              return Row(
-                children: [
-                  Expanded(flex: 4, child: share),
-                  const SizedBox(width: JaraSpacing.md),
-                  Expanded(flex: 6, child: open),
-                ],
-              );
-            },
+              },
+            ),
           ),
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/design/breakpoints.dart';
 import '../../core/design/haptics.dart';
 import '../../core/design/jara_theme.dart';
 import '../../core/design/tokens.dart';
@@ -14,6 +15,18 @@ import '../../core/widgets/neu_card.dart';
 import '../../core/widgets/neu_tile.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/state_views.dart';
+
+/// An account list is a settings form: rows cap and centre rather than
+/// stranding a sync button 1300 dp from its account name.
+Widget _formColumn(WindowClass w, Widget child) => w.isPhone
+    ? child
+    : Center(
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(maxWidth: JaraBreakpoints.proseMaxWidth),
+          child: child,
+        ),
+      );
 
 class ConnectionsScreen extends ConsumerStatefulWidget {
   const ConnectionsScreen({super.key});
@@ -48,6 +61,54 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
   /// the one place that explains what broke and offers the way back.
   Future<void> _showReconnectSheet(ConnectionInfo c) {
     final t = context.jara;
+
+    Widget body(BuildContext sheetContext, {required bool dialog}) => Padding(
+          padding: const EdgeInsets.fromLTRB(
+              JaraSpacing.xl, JaraSpacing.md, JaraSpacing.xl, JaraSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!dialog)
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: t.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ErrorStateView(
+                JaraError.accountDisconnected,
+                compact: true,
+                onPrimary: () {
+                  Navigator.of(sheetContext).pop();
+                  _reconnect(c);
+                },
+              ),
+            ],
+          ),
+        );
+
+    // Bottom sheets are a thumb idiom; from `medium` up this lands as a
+    // centred dialog instead of a full-width slab.
+    if (JaraBreakpoints.of(context).usesRail) {
+      return showDialog<void>(
+        context: context,
+        barrierColor: t.scrim,
+        builder: (dialogContext) => Dialog(
+          backgroundColor: t.surfaceElevated,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(JaraRadius.sheet),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: body(dialogContext, dialog: true),
+          ),
+        ),
+      );
+    }
+
     return showModalBottomSheet<void>(
       context: context,
       backgroundColor: t.surfaceElevated,
@@ -58,31 +119,7 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
         borderRadius:
             BorderRadius.vertical(top: Radius.circular(JaraRadius.sheet)),
       ),
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.fromLTRB(
-            JaraSpacing.xl, JaraSpacing.md, JaraSpacing.xl, JaraSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: t.border,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            ErrorStateView(
-              JaraError.accountDisconnected,
-              compact: true,
-              onPrimary: () {
-                Navigator.of(sheetContext).pop();
-                _reconnect(c);
-              },
-            ),
-          ],
-        ),
-      ),
+      builder: (sheetContext) => body(sheetContext, dialog: false),
     );
   }
 
@@ -101,42 +138,50 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
     final t = context.jara;
     final s = ref.strings;
     final connections = ref.watch(memoryRepositoryProvider).connections;
+    final w = context.windowClass;
+    final inset = JaraBreakpoints.pageInsetFor(w);
 
     return Scaffold(
       backgroundColor: t.surface,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            JaraSpacing.page, JaraSpacing.xl, JaraSpacing.page, JaraSpacing.huge),
-          children: [
-            Row(
-              children: [
-                NeuIconButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  onTap: () => context.pop(),
-                  semanticLabel: s.back,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(s.connectionsTitle,
-                          style: JaraType.title2.copyWith(color: t.textPrimary)),
-                      const SizedBox(height: 2),
-                      Text(s.connectionsSubtitle,
-                          style: JaraType.footnote.copyWith(color: t.textSecondary)),
-                    ],
+        child: _formColumn(
+          w,
+          ListView(
+            padding: EdgeInsets.fromLTRB(
+                inset, JaraSpacing.xl, inset, JaraSpacing.huge),
+            children: [
+              Row(
+                children: [
+                  NeuIconButton(
+                    icon: Icons.arrow_back_ios_new_rounded,
+                    onTap: () => context.pop(),
+                    semanticLabel: s.back,
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.connectionsTitle,
+                            style:
+                                JaraType.title2.copyWith(color: t.textPrimary)),
+                        const SizedBox(height: 2),
+                        Text(s.connectionsSubtitle,
+                            style: JaraType.footnote
+                                .copyWith(color: t.textSecondary)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: JaraSpacing.xl),
+              for (var i = 0; i < connections.length; i++) ...[
+                StaggeredItem(index: i, child: _card(t, s, connections[i])),
+                if (i != connections.length - 1)
+                  const SizedBox(height: JaraSpacing.md),
               ],
-            ),
-            const SizedBox(height: JaraSpacing.xl),
-            for (var i = 0; i < connections.length; i++) ...[
-              StaggeredItem(index: i, child: _card(t, s, connections[i])),
-              if (i != connections.length - 1) const SizedBox(height: JaraSpacing.md),
             ],
-          ],
+          ),
         ),
       ),
     );

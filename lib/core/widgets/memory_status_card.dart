@@ -69,6 +69,8 @@ class MemoryStatusCard extends StatelessWidget {
                   ],
                 ),
               ),
+              // chevron_right_rounded carries matchTextDirection, so
+              // Icon flips it itself in RTL — no manual mirroring.
               Icon(Icons.chevron_right_rounded,
                   color: t.textOnSkyTertiary),
             ],
@@ -79,6 +81,9 @@ class MemoryStatusCard extends StatelessWidget {
             child: SizedBox(
               height: 6,
               child: Stack(
+                // Progress grows from the reading edge: the fill is an
+                // unpositioned child, so the stack alignment places it.
+                alignment: AlignmentDirectional.topStart,
                 children: [
                   Container(color: Colors.white.withValues(alpha: 0.08)),
                   FractionallySizedBox(

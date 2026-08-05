@@ -291,6 +291,7 @@ class WatchStateView extends StatelessWidget {
     required this.message,
     this.tint,
     this.actionLabel,
+    this.actionIcon = Icons.refresh_rounded,
     this.onAction,
   });
 
@@ -299,6 +300,7 @@ class WatchStateView extends StatelessWidget {
   final String message;
   final Color? tint;
   final String? actionLabel;
+  final IconData actionIcon;
   final VoidCallback? onAction;
 
   @override
@@ -338,7 +340,7 @@ class WatchStateView extends StatelessWidget {
             WatchPrimaryAction(
               label: actionLabel!,
               doneLabel: actionLabel!,
-              icon: Icons.refresh_rounded,
+              icon: actionIcon,
               onTap: onAction!,
             ),
           ],

@@ -22,6 +22,23 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<!-- Landing pad for the share extension's hand-off: it writes the
+	     payload into the App Group container and then opens jara://share
+	     to bring the app forward. See ios/ShareExtension/README.md and
+	     docs/SHARE_INTAKE.md — this scheme name is part of that contract. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.jara.jaraUniversalSearch.share</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>jara</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>

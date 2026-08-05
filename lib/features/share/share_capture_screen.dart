@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/providers.dart';
+import '../../core/data/share_intake.dart';
 import '../../core/design/breakpoints.dart';
 import '../../core/design/haptics.dart';
 import '../../core/design/jara_theme.dart';
@@ -17,9 +18,14 @@ import '../../core/widgets/neu_tile.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/state_views.dart';
 
-/// Standalone demo of the OS share-sheet target: JARA mocks the enrichment
-/// for whatever landed here and one tap saves it — the "two taps to saved"
-/// promise (share, then Save instantly).
+/// The OS share-sheet target: whatever landed here is previewed, enriched
+/// and one tap away from saved — the "two taps to saved" promise (share,
+/// then Save instantly).
+///
+/// The payload arrives through [pendingShareProvider], not the
+/// constructor: `/share-capture` is built as `const ShareCaptureScreen()`
+/// by the router. With no payload — the standalone demo entry point — the
+/// screen keeps its VoxBridge mock.
 class ShareCaptureScreen extends ConsumerStatefulWidget {
   const ShareCaptureScreen({super.key});
 
@@ -29,11 +35,28 @@ class ShareCaptureScreen extends ConsumerStatefulWidget {
 
 class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
   static const _mockTitle = 'VoxBridge pricing page';
+  static const _mockPreviewTitle = 'VoxBridge — pricing page';
+  static const _mockPreviewMeta = 'voxbridge.app/pricing';
   static const List<String> _mockTags = ['voxbridge', 'pricing', 'links'];
 
-  final _titleController = TextEditingController(text: _mockTitle);
-  String? _collection = 'VoxBridge';
+  /// Taken once, then cleared: a share belongs to exactly one visit.
+  /// Read in `initState` rather than `build` so the switch to the success
+  /// card cannot lose it.
+  SharedPayload? _payload;
+
+  late final TextEditingController _titleController;
+  String? _collection;
   MemoryItem? _saved;
+
+  @override
+  void initState() {
+    super.initState();
+    _payload = ref.read(pendingShareProvider).take();
+    _titleController =
+        TextEditingController(text: _suggestedTitle(ref.read(stringsProvider)));
+    // The mock pre-files itself; a real share waits for the user to pick.
+    _collection = _payload == null ? 'VoxBridge' : null;
+  }
 
   @override
   void dispose() {
@@ -41,18 +64,58 @@ class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
     super.dispose();
   }
 
+  MemoryType get _memoryType => switch (_payload?.type) {
+        SharedPayloadType.text => MemoryType.note,
+        SharedPayloadType.image => MemoryType.photo,
+        // No payload = the demo route, whose mock is a link.
+        SharedPayloadType.url || null => MemoryType.link,
+      };
+
+  String _suggestedTitle(JaraStrings s) {
+    final payload = _payload;
+    if (payload == null) return _mockTitle;
+    final derived = payload.suggestedTitle;
+    if (derived != null) return derived;
+    return payload.itemCount > 1
+        ? '${payload.itemCount} ${s.typePluralLabel(MemoryType.photo)}'
+        : s.typeLabel(MemoryType.photo);
+  }
+
+  /// The preview names what arrived; the count lives in the badge beside
+  /// it, so the line itself stays "Photos" rather than repeating "3".
+  String _previewTitle(JaraStrings s) {
+    final payload = _payload;
+    if (payload == null) return _mockPreviewTitle;
+    if (payload.type != SharedPayloadType.image) return _suggestedTitle(s);
+    return payload.itemCount > 1
+        ? s.typePluralLabel(MemoryType.photo)
+        : s.typeLabel(MemoryType.photo);
+  }
+
+  List<String> get _tags => _payload?.suggestedTags ?? _mockTags;
+
+  /// What the index gets to search on. Images carry no text yet — that
+  /// arrives with OCR, not with the share.
+  String _snippet(JaraStrings s) {
+    final payload = _payload;
+    if (payload == null || payload.type == SharedPayloadType.image) {
+      return s.addedJustNow;
+    }
+    return payload.value;
+  }
+
   void _saveInstantly() {
     final s = ref.read(stringsProvider);
     final typed = _titleController.text.trim();
     final item = MemoryItem(
       id: 'user-${DateTime.now().millisecondsSinceEpoch}',
-      type: MemoryType.link,
-      title: typed.isEmpty ? _mockTitle : typed,
-      snippet: s.addedJustNow,
+      type: _memoryType,
+      title: typed.isEmpty ? _suggestedTitle(s) : typed,
+      snippet: _snippet(s),
       source: s.manualAddSource,
       date: DateTime.now(),
-      tags: _mockTags,
-      collection: _collection ?? 'VoxBridge',
+      tags: _tags,
+      collection: _payload == null ? _collection ?? 'VoxBridge' : _collection,
     );
     ref.read(memoryRepositoryProvider).add(item);
     ref.read(memoryRevisionProvider.notifier).state++;
@@ -116,6 +179,7 @@ class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
     JaraStrings s,
     List<MemoryCollection> collections,
   ) {
+    final tags = _tags;
     return Column(
       key: const ValueKey('form'),
       mainAxisSize: MainAxisSize.min,
@@ -136,41 +200,7 @@ class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
           ],
         ),
         const SizedBox(height: JaraSpacing.lg),
-        Container(
-          height: 96,
-          padding: const EdgeInsets.all(JaraSpacing.md),
-          decoration: BoxDecoration(
-            color: MemoryType.link.color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.link_rounded, color: MemoryType.link.color, size: 28),
-              const SizedBox(width: JaraSpacing.md),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'VoxBridge — pricing page',
-                      style: JaraType.bodyMedium.copyWith(color: t.textPrimary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: JaraSpacing.xs),
-                    Text(
-                      'voxbridge.app/pricing',
-                      style: JaraType.footnote.copyWith(color: t.textTertiary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        _preview(t, s),
         const SizedBox(height: JaraSpacing.md),
         SectionHeader(title: s.addSuggestedTitle),
         NeuCard(
@@ -185,17 +215,19 @@ class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
             ),
           ),
         ),
-        const SizedBox(height: JaraSpacing.md),
-        SectionHeader(title: s.addSuggestedTags),
-        const Wrap(
-          spacing: JaraSpacing.sm,
-          runSpacing: JaraSpacing.sm,
-          children: [
-            JaraChip(label: 'voxbridge'),
-            JaraChip(label: 'pricing'),
-            JaraChip(label: 'links'),
-          ],
-        ),
+        // A shared note or image gives JARA nothing to tag from yet, so
+        // the section stays out of the way instead of showing empty.
+        if (tags.isNotEmpty) ...[
+          const SizedBox(height: JaraSpacing.md),
+          SectionHeader(title: s.addSuggestedTags),
+          Wrap(
+            spacing: JaraSpacing.sm,
+            runSpacing: JaraSpacing.sm,
+            children: [
+              for (final tag in tags) JaraChip(label: tag),
+            ],
+          ),
+        ],
         const SizedBox(height: JaraSpacing.md),
         SectionHeader(title: s.addCollection),
         Wrap(
@@ -241,8 +273,59 @@ class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
     );
   }
 
+  /// What arrived, in the colour of the memory type it will become: the
+  /// title line is JARA's suggestion, the line under it is the raw payload
+  /// (URL, text, or the first image URI).
+  Widget _preview(JaraTokens t, JaraStrings s) {
+    final payload = _payload;
+    final type = _memoryType;
+    final isText = payload?.type == SharedPayloadType.text;
+    return Container(
+      height: 96,
+      padding: const EdgeInsets.all(JaraSpacing.md),
+      decoration: BoxDecoration(
+        color: type.color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(type.icon, color: type.color, size: 28),
+          const SizedBox(width: JaraSpacing.md),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _previewTitle(s),
+                  style: JaraType.bodyMedium.copyWith(color: t.textPrimary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: JaraSpacing.xs),
+                Text(
+                  payload == null ? _mockPreviewMeta : payload.value,
+                  style: JaraType.footnote.copyWith(color: t.textTertiary),
+                  maxLines: isText ? 2 : 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          if (payload != null &&
+              payload.type == SharedPayloadType.image &&
+              payload.itemCount > 1) ...[
+            const SizedBox(width: JaraSpacing.sm),
+            JaraChip(label: '${payload.itemCount}', color: type.color),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildSuccess(JaraTokens t, JaraStrings s, MemoryItem item) {
     final reduced = JaraMotion.reduced(context);
+    final typeLabel = s.typeLabel(item.type);
     return Column(
       key: const ValueKey('success'),
       mainAxisSize: MainAxisSize.min,
@@ -265,7 +348,9 @@ class _ShareCaptureScreenState extends ConsumerState<ShareCaptureScreen> {
         ),
         const SizedBox(height: JaraSpacing.sm),
         Text(
-          '${s.typeLabel(item.type)} · ${item.tags.join(' · ')}',
+          item.tags.isEmpty
+              ? typeLabel
+              : '$typeLabel · ${item.tags.join(' · ')}',
           style: JaraType.subhead.copyWith(color: t.textSecondary),
           textAlign: TextAlign.center,
         ),

@@ -36,6 +36,29 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Share sheet intake — the core promise, "share from any app
+                 into JARA". Three filters because the system matches on
+                 action + mimeType, and one filter listing several data
+                 elements would also accept SEND_MULTIPLE of text/plain,
+                 which MainActivity has no payload shape for.
+                 launchMode="singleTop" above is load-bearing: a share
+                 arriving while JARA is on top reaches onNewIntent instead
+                 of stacking a second copy of the app. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+            </intent-filter>
         </activity>
         <!-- Wear OS standalone: JARA searches the on-device index, so the
              watch app installs and runs without the phone app present.

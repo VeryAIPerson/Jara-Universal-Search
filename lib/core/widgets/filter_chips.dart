@@ -6,6 +6,7 @@ import '../design/motion.dart';
 import '../design/tokens.dart';
 import '../design/typography.dart';
 import '../models/memory_item.dart';
+import 'pressable.dart';
 
 /// Horizontal source-filter rail. Pass [onSky] true when it sits on the
 /// dark hemisphere.
@@ -163,10 +164,16 @@ class JaraChip extends StatelessWidget {
       ),
     );
     if (onTap == null) return chip;
+    // minHitBox (pressable.dart) grows only the hit area to 44pt — the
+    // pill itself stays exactly as compact as the untappable case above.
     return Semantics(
       button: true,
       label: label,
-      child: GestureDetector(onTap: onTap, child: chip),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: minHitBox(JaraSize.touchMin, chip),
+      ),
     );
   }
 }

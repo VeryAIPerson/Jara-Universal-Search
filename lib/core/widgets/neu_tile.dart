@@ -68,6 +68,7 @@ class NeuTile extends StatelessWidget {
                       meta!,
                       style: JaraType.caption.copyWith(color: t.textTertiary),
                       maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ],
@@ -126,6 +127,9 @@ class NeuIconButton extends StatelessWidget {
     return Pressable(
       onTap: onTap,
       semanticLabel: semanticLabel,
+      // size can be < touchMin (e.g. 38 for a denser row); the hit box
+      // never shrinks below 44 even when the visible circle does.
+      minHitSize: JaraSize.touchMin,
       child: Container(
         width: size,
         height: size,

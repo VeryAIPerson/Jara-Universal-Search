@@ -12,6 +12,13 @@ import '../../core/widgets/filter_chips.dart';
 import '../../core/widgets/neu_card.dart';
 import '../../core/widgets/notch_app_bar.dart';
 
+/// Inside a Wrap, SearchFilterChip's centered AnimatedContainer greedily
+/// fills the run's available width (each chip becomes a full-width bar).
+/// IntrinsicWidth forces it back to its natural label width — chips hug
+/// their text and the group reads as one segmented row, wrapping to a
+/// second line only if it genuinely can't fit (large text scale).
+Widget _segmented(Widget chip) => IntrinsicWidth(child: chip);
+
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -62,27 +69,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                SearchFilterChip(
+                _segmented(SearchFilterChip(
                   label: s.settingsThemeDark,
                   selected: themeMode == ThemeMode.dark,
                   onSky: false,
                   onTap: () =>
                       ref.read(themeModeProvider.notifier).state = ThemeMode.dark,
-                ),
-                SearchFilterChip(
+                )),
+                _segmented(SearchFilterChip(
                   label: s.settingsThemeLight,
                   selected: themeMode == ThemeMode.light,
                   onSky: false,
                   onTap: () =>
                       ref.read(themeModeProvider.notifier).state = ThemeMode.light,
-                ),
-                SearchFilterChip(
+                )),
+                _segmented(SearchFilterChip(
                   label: s.settingsThemeSystem,
                   selected: themeMode == ThemeMode.system,
                   onSky: false,
                   onTap: () =>
                       ref.read(themeModeProvider.notifier).state = ThemeMode.system,
-                ),
+                )),
               ],
             ),
             const SizedBox(height: JaraSpacing.lg),
@@ -91,25 +98,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                SearchFilterChip(
+                _segmented(SearchFilterChip(
                   label: 'English',
                   selected: locale.languageCode == 'en',
                   onSky: false,
                   onTap: () =>
                       ref.read(localeProvider.notifier).state = const Locale('en'),
-                ),
-                SearchFilterChip(
+                )),
+                _segmented(SearchFilterChip(
                   label: 'Türkçe',
                   selected: locale.languageCode == 'tr',
                   onSky: false,
                   onTap: () =>
                       ref.read(localeProvider.notifier).state = const Locale('tr'),
-                ),
+                )),
               ],
             ),
             const SizedBox(height: JaraSpacing.xxl),
-            // No generic section-header key in JaraStrings yet.
-            const SectionHeader(title: 'General'), // l10n-todo
+            SectionHeader(title: s.sectionGeneral),
             _SettingsTile(
               icon: Icons.hub_outlined,
               label: s.settingsConnectedAccounts,
@@ -172,33 +178,47 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _identityCard(JaraTokens t, JaraStrings s) {
+    // Pill on its own row: sharing the top row with the pill squeezed the
+    // email down to an unreadable ellipsis. The text column now gets the
+    // full card width and the pill (a trust signal) still reads clearly
+    // underneath, indented to the identity block it belongs to.
     return NeuCard(
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(gradient: t.accentGradient, shape: BoxShape.circle),
-            child: Text('A', style: JaraType.headline.copyWith(color: Colors.white)),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Azad', style: JaraType.headline.copyWith(color: t.textPrimary)),
-                const SizedBox(height: 2),
-                Text(
-                  'justarealassistant@gmail.com',
-                  style: JaraType.footnote.copyWith(color: t.textSecondary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                alignment: Alignment.center,
+                decoration:
+                    BoxDecoration(gradient: t.accentGradient, shape: BoxShape.circle),
+                child: Text('A', style: JaraType.headline.copyWith(color: Colors.white)),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Azad', style: JaraType.headline.copyWith(color: t.textPrimary)),
+                    const SizedBox(height: 2),
+                    Text(
+                      'justarealassistant@gmail.com',
+                      style: JaraType.footnote.copyWith(color: t.textSecondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          PrivacyPill(label: s.privacyLocalActive, active: true),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 70),
+            child: PrivacyPill(label: s.privacyLocalActive, active: true),
+          ),
         ],
       ),
     );

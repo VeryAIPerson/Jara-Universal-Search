@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design/jara_theme.dart';
+import '../design/tokens.dart';
 import '../design/typography.dart';
 import '../models/memory_item.dart';
 import 'filter_chips.dart';
@@ -71,6 +72,10 @@ class UniversalResultCard extends StatelessWidget {
                       Pressable(
                         onTap: onPin,
                         semanticLabel: item.pinned ? 'Unpin' : 'Pin',
+                        // Hit box grows to the 44pt minimum (nested inside
+                        // the card's own Pressable, so it wins taps within
+                        // its bounds and the card tap still owns the rest).
+                        minHitSize: JaraSize.touchMin,
                         child: Padding(
                           padding:
                               const EdgeInsetsDirectional.only(start: 6),
@@ -153,7 +158,9 @@ class _LeadingBlock extends StatelessWidget {
       final month = _monthShort(item.date.month);
       return Container(
         width: 52,
-        height: 56,
+        // minHeight not height: at large text scale the day/month lines
+        // need more than 56 — let the block grow instead of overflowing.
+        constraints: const BoxConstraints(minHeight: 56),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.14),
           borderRadius: BorderRadius.circular(14),
@@ -174,7 +181,7 @@ class _LeadingBlock extends StatelessWidget {
         item.type == MemoryType.photo || item.type == MemoryType.screenshot;
     return Container(
       width: 52,
-      height: 56,
+      constraints: const BoxConstraints(minHeight: 56),
       decoration: BoxDecoration(
         color: color.withValues(alpha: t.isDark ? 0.16 : 0.14),
         borderRadius: BorderRadius.circular(14),

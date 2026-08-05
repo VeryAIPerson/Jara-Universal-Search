@@ -74,7 +74,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                 NeuIconButton(
                   icon: Icons.arrow_back_ios_new_rounded,
                   onTap: () => context.pop(),
-                  semanticLabel: 'Back', // l10n-todo
+                  semanticLabel: s.back,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -120,14 +120,13 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
             _infoBlock(t, Icons.cloud_outlined, t.accentBright, s.privacyCloudSection,
                 s.privacyCloudBody),
             const SizedBox(height: JaraSpacing.xxl),
-            // No generic section-header key in JaraStrings yet.
-            const SectionHeader(title: 'Intelligence'), // l10n-todo
+            SectionHeader(title: s.sectionIntelligence),
             _ToggleTile(
               icon: Icons.memory_rounded,
               iconColor: t.success,
               label: s.privacyLocalAi,
               value: true,
-              onChanged: (_) => _snack('Always on'), // l10n-todo
+              onChanged: (_) => _snack(s.alwaysOn),
             ),
             const SizedBox(height: 10),
             _ToggleTile(
@@ -167,7 +166,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
               onChanged: (v) => setState(() => _sensitive = v),
             ),
             const SizedBox(height: JaraSpacing.xxl),
-            const SectionHeader(title: 'Data'), // l10n-todo
+            SectionHeader(title: s.sectionData),
             _ActionTile(
               icon: Icons.file_download_outlined,
               label: s.privacyExport,

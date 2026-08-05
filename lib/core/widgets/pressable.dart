@@ -14,6 +14,7 @@ class Pressable extends StatefulWidget {
     this.haptic = true,
     this.semanticLabel,
     this.semanticButton = true,
+    this.minHitSize,
   });
 
   final Widget child;
@@ -22,6 +23,11 @@ class Pressable extends StatefulWidget {
   final bool haptic;
   final String? semanticLabel;
   final bool semanticButton;
+
+  /// Minimum tap-target side length, see [minHitBox]. Null (the default)
+  /// keeps the gesture box exactly [child]'s own size — unchanged for
+  /// every existing caller that doesn't opt in.
+  final double? minHitSize;
 
   @override
   State<Pressable> createState() => _PressableState();
@@ -33,6 +39,7 @@ class _PressableState extends State<Pressable> {
   @override
   Widget build(BuildContext context) {
     final reduced = JaraMotion.reduced(context);
+    final size = widget.minHitSize;
     return Semantics(
       button: widget.semanticButton,
       label: widget.semanticLabel,
@@ -54,9 +61,21 @@ class _PressableState extends State<Pressable> {
           scale: _down && !reduced ? 0.97 : 1,
           duration: JaraMotion.fast,
           curve: JaraMotion.standard,
-          child: widget.child,
+          child: size == null ? widget.child : minHitBox(size, widget.child),
         ),
       ),
     );
   }
 }
+
+/// Centers [child] in a box at least [size] on each axis — grows only the
+/// invisible hit/layout area so a visually smaller control (a compact
+/// chip, a sub-44 icon button) still satisfies the ≥44 touch-target
+/// minimum (JaraSize.touchMin). [child]'s own painted size is untouched.
+/// The one hit-target mechanism shared app-wide: built into [Pressable]
+/// via [Pressable.minHitSize], and used directly by widgets (e.g.
+/// JaraChip) that must not also pick up Pressable's haptic/press-scale.
+Widget minHitBox(double size, Widget child) => ConstrainedBox(
+      constraints: BoxConstraints(minWidth: size, minHeight: size),
+      child: Center(widthFactor: 1, heightFactor: 1, child: child),
+    );

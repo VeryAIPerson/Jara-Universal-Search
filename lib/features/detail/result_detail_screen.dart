@@ -207,7 +207,7 @@ class ResultDetailScreen extends ConsumerWidget {
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(JaraSpacing.page),
+              padding: EdgeInsets.all(inset),
               child: EmptyStateView(
                 icon: Icons.link_off_rounded,
                 title: s.errorGenericTitle,

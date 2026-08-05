@@ -1,20 +1,284 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../core/data/providers.dart';
+import '../../core/design/haptics.dart';
 import '../../core/design/jara_theme.dart';
+import '../../core/design/tokens.dart';
 import '../../core/design/typography.dart';
 import '../../core/l10n_bridge.dart';
+import '../../core/widgets/filter_chips.dart';
+import '../../core/widgets/neu_card.dart';
+import '../../core/widgets/notch_app_bar.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _voiceEnabled = true;
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _startReindex(JaraStrings s) {
+    JaraHaptics.confirm();
+    ref.read(indexStateProvider.notifier).state = IndexState.indexing;
+    _snack(s.connectionReindex);
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      ref.read(indexStateProvider.notifier).state = IndexState.idle;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final t = context.jara;
+    final s = ref.strings;
+    final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
+    final stats = ref.watch(memoryStatsProvider);
+
     return Scaffold(
       backgroundColor: t.surface,
-      body: Center(
-        child: Text('ProfileScreen', style: JaraType.title2.copyWith(color: t.textPrimary)),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            JaraSpacing.page, JaraSpacing.sm, JaraSpacing.page, 140),
+          children: [
+            Text(s.settingsTitle, style: JaraType.title1.copyWith(color: t.textPrimary)),
+            const SizedBox(height: JaraSpacing.lg),
+            _identityCard(t, s),
+            const SizedBox(height: JaraSpacing.xl),
+            _premiumCard(t, s),
+            const SizedBox(height: JaraSpacing.xxl),
+            SectionHeader(title: s.settingsTheme),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                SearchFilterChip(
+                  label: s.settingsThemeDark,
+                  selected: themeMode == ThemeMode.dark,
+                  onSky: false,
+                  onTap: () =>
+                      ref.read(themeModeProvider.notifier).state = ThemeMode.dark,
+                ),
+                SearchFilterChip(
+                  label: s.settingsThemeLight,
+                  selected: themeMode == ThemeMode.light,
+                  onSky: false,
+                  onTap: () =>
+                      ref.read(themeModeProvider.notifier).state = ThemeMode.light,
+                ),
+                SearchFilterChip(
+                  label: s.settingsThemeSystem,
+                  selected: themeMode == ThemeMode.system,
+                  onSky: false,
+                  onTap: () =>
+                      ref.read(themeModeProvider.notifier).state = ThemeMode.system,
+                ),
+              ],
+            ),
+            const SizedBox(height: JaraSpacing.lg),
+            SectionHeader(title: s.settingsLanguage),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                SearchFilterChip(
+                  label: 'English',
+                  selected: locale.languageCode == 'en',
+                  onSky: false,
+                  onTap: () =>
+                      ref.read(localeProvider.notifier).state = const Locale('en'),
+                ),
+                SearchFilterChip(
+                  label: 'Türkçe',
+                  selected: locale.languageCode == 'tr',
+                  onSky: false,
+                  onTap: () =>
+                      ref.read(localeProvider.notifier).state = const Locale('tr'),
+                ),
+              ],
+            ),
+            const SizedBox(height: JaraSpacing.xxl),
+            // No generic section-header key in JaraStrings yet.
+            const SectionHeader(title: 'General'), // l10n-todo
+            _SettingsTile(
+              icon: Icons.hub_outlined,
+              label: s.settingsConnectedAccounts,
+              onTap: () => context.push('/profile/connections'),
+            ),
+            const SizedBox(height: 10),
+            _SettingsTile(
+              icon: Icons.shield_outlined,
+              label: s.settingsPrivacySecurity,
+              onTap: () => context.push('/profile/privacy'),
+            ),
+            const SizedBox(height: 10),
+            _SettingsTile(
+              icon: Icons.manage_search_rounded,
+              label: s.settingsSearchSources,
+              onTap: () => _snack(s.settingsSearchSources),
+            ),
+            const SizedBox(height: 10),
+            _SettingsTile(
+              icon: Icons.mic_none_rounded,
+              label: s.settingsVoice,
+              trailing: Semantics(
+                label: s.settingsVoice,
+                child: Switch.adaptive(
+                  value: _voiceEnabled,
+                  activeThumbColor: t.accent,
+                  onChanged: (v) => setState(() => _voiceEnabled = v),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _SettingsTile(
+              icon: Icons.notifications_none_rounded,
+              label: s.settingsNotifications,
+              onTap: () => _snack(s.settingsNotifications),
+            ),
+            const SizedBox(height: 10),
+            _SettingsTile(
+              icon: Icons.donut_small_outlined,
+              label: s.settingsStorage,
+              onTap: () => _snack(stats.storageUsedLabel),
+            ),
+            const SizedBox(height: 10),
+            _SettingsTile(
+              icon: Icons.sync_rounded,
+              label: s.settingsIndexing,
+              onTap: () => _startReindex(s),
+            ),
+            const SizedBox(height: JaraSpacing.xxl),
+            Center(
+              child: Text(
+                '${s.appName} · 0.1.0',
+                style: JaraType.caption.copyWith(color: t.textTertiary),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _identityCard(JaraTokens t, JaraStrings s) {
+    return NeuCard(
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(gradient: t.accentGradient, shape: BoxShape.circle),
+            child: Text('A', style: JaraType.headline.copyWith(color: Colors.white)),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Azad', style: JaraType.headline.copyWith(color: t.textPrimary)),
+                const SizedBox(height: 2),
+                Text(
+                  'justarealassistant@gmail.com',
+                  style: JaraType.footnote.copyWith(color: t.textSecondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          PrivacyPill(label: s.privacyLocalActive, active: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _premiumCard(JaraTokens t, JaraStrings s) {
+    return NeuCard(
+      onTap: () => _snack(s.settingsSubscription),
+      semanticLabel: s.settingsPremium,
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: t.gold.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(Icons.auto_awesome_rounded, color: t.gold, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(s.settingsPremium, style: JaraType.headline.copyWith(color: t.textPrimary)),
+                const SizedBox(height: 3),
+                Text(s.settingsPremiumBody,
+                    style: JaraType.footnote.copyWith(color: t.textSecondary)),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: t.gold),
+        ],
+      ),
+    );
+  }
+}
+
+/// Row item for the General settings list: icon badge + label + trailing.
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
+    required this.icon,
+    required this.label,
+    this.onTap,
+    this.trailing,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.jara;
+    return NeuCard(
+      padding: const EdgeInsets.all(14),
+      onTap: onTap,
+      semanticLabel: label,
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: t.accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: t.accent, size: 19),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(label, style: JaraType.bodyMedium.copyWith(color: t.textPrimary)),
+          ),
+          const SizedBox(width: 10),
+          trailing ?? Icon(Icons.chevron_right_rounded, color: t.textTertiary),
+        ],
       ),
     );
   }

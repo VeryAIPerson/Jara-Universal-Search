@@ -163,6 +163,10 @@ class JaraChip extends StatelessWidget {
       ),
     );
     if (onTap == null) return chip;
-    return GestureDetector(onTap: onTap, child: chip);
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(onTap: onTap, child: chip),
+    );
   }
 }

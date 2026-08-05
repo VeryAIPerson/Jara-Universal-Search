@@ -240,11 +240,16 @@ final stringsProvider = Provider<JaraStrings>(
 
 extension StringsContext on WidgetRef {
   JaraStrings get strings => watch(stringsProvider);
+
+  /// The pinned-in-tests wall clock; pass to [relativeDate] so labels
+  /// stay deterministic under a fixed [clockProvider].
+  DateTime get now => read(clockProvider)();
 }
 
-/// Relative date label helper shared by cards.
-String relativeDate(JaraStrings s, DateTime date) {
-  final now = DateTime.now();
+/// Relative date label helper shared by cards. [now] defaults to the wall
+/// clock; screens pass `ref.now` so goldens can pin it.
+String relativeDate(JaraStrings s, DateTime date, {DateTime? now}) {
+  now ??= DateTime.now();
   final diff = now.difference(date);
   if (diff.isNegative) {
     final ahead = date.difference(now);

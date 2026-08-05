@@ -266,7 +266,7 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
           child: UniversalResultCard(
             item: item,
             query: outcome.query,
-            dateLabel: relativeDate(s, item.date),
+            dateLabel: relativeDate(s, item.date, now: ref.now),
             onTap: () => context.push('/item/${item.id}'),
             onPin: () {
               ref.read(memoryRepositoryProvider).togglePin(item.id);

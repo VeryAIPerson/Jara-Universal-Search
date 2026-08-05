@@ -54,7 +54,7 @@ class CollectionDetailScreen extends ConsumerWidget {
           index: i,
           child: UniversalResultCard(
             item: items[i],
-            dateLabel: relativeDate(s, items[i].date),
+            dateLabel: relativeDate(s, items[i].date, now: ref.now),
             onTap: () => context.push('/item/${items[i].id}'),
             onPin: () => togglePin(items[i].id),
           ),

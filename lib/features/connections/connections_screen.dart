@@ -269,7 +269,8 @@ class _ConnectionsScreenState extends ConsumerState<ConnectionsScreen> {
             Row(
               children: [
                 Text(
-                  s.lastSynced(relativeDate(s, c.lastSync ?? DateTime.now())),
+                  s.lastSynced(relativeDate(s, c.lastSync ?? ref.now,
+                      now: ref.now)),
                   style: JaraType.caption.copyWith(color: t.textTertiary),
                 ),
                 const Spacer(),

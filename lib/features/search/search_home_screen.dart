@@ -99,7 +99,7 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
   }
 
   String _greeting(JaraStrings s) {
-    final hour = DateTime.now().hour;
+    final hour = ref.now.hour;
     if (hour < 12) return s.greetingMorning('');
     if (hour < 18) return s.greetingDay('');
     return s.greetingEvening('');
@@ -165,7 +165,8 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
                   s.memoryStatusItems(stats.totalItems, stats.collections),
               freeLabel: stats.storageFreeLabel,
               lastIndexedLabel:
-                  s.indexedAgo(relativeDate(s, stats.lastIndexed)),
+                  s.indexedAgo(
+                      relativeDate(s, stats.lastIndexed, now: ref.now)),
               onTap: () => context.go('/memory'),
             ),
           ] else ...[
@@ -460,7 +461,7 @@ class _RecentlySaved extends ConsumerWidget {
           index: i,
           child: UniversalResultCard(
             item: items[i],
-            dateLabel: relativeDate(s, items[i].date),
+            dateLabel: relativeDate(s, items[i].date, now: ref.now),
             onTap: () => context.push('/item/${items[i].id}'),
           ),
         );

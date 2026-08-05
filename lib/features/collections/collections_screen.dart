@@ -54,7 +54,8 @@ class CollectionsScreen extends ConsumerWidget {
             child: _CollectionCard(
               collection: collections[index],
               itemsLabel: s.collectionItems(collections[index].itemCount),
-              updatedLabel: relativeDate(s, collections[index].updated),
+              updatedLabel: relativeDate(s, collections[index].updated,
+                  now: ref.now),
             ),
           ),
         );

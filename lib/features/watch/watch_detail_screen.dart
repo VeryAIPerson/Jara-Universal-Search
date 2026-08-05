@@ -119,7 +119,7 @@ class _WatchDetailScreenState extends ConsumerState<WatchDetailScreen> {
             ),
             const SizedBox(height: JaraSpacing.md),
             Text(
-              '${item.source} · ${relativeDate(s, item.date)}',
+              '${item.source} · ${relativeDate(s, item.date, now: ref.now)}',
               textAlign: TextAlign.center,
               style: WatchType.meta.copyWith(color: t.textOnSkyTertiary),
             ),

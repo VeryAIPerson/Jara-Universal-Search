@@ -80,7 +80,7 @@ class WatchResultsScreen extends ConsumerWidget {
                 for (final item in outcome.items) ...[
                   WatchResultRow(
                     item: item,
-                    meta: _metaFor(s, item),
+                    meta: _metaFor(s, item, ref.now),
                     onTap: () => context.push(WatchRoutes.itemPath(item.id)),
                   ),
                   const SizedBox(height: JaraSpacing.sm),
@@ -95,8 +95,8 @@ class WatchResultsScreen extends ConsumerWidget {
 
   /// Date first: the line ellipsizes on a narrow face, and "when" is what
   /// a wearer is triangulating on — the coloured icon already says what.
-  static String _metaFor(JaraStrings s, MemoryItem item) =>
-      '${relativeDate(s, item.date)} · ${item.source}';
+  static String _metaFor(JaraStrings s, MemoryItem item, DateTime now) =>
+      '${relativeDate(s, item.date, now: now)} · ${item.source}';
 }
 
 /// Query line, optional offline marker, then whatever the state supplies.

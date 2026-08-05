@@ -5,8 +5,12 @@ import '../models/memory_item.dart';
 import 'connectivity_service.dart';
 import 'mock_memory_repository.dart';
 
-final memoryRepositoryProvider =
-    Provider<MockMemoryRepository>((ref) => MockMemoryRepository());
+/// The app's one clock. Goldens and widget tests override this to a fixed
+/// instant so greetings, timeline days and relative dates stop drifting.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+final memoryRepositoryProvider = Provider<MockMemoryRepository>(
+    (ref) => MockMemoryRepository(clock: ref.watch(clockProvider)));
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.dark);
 

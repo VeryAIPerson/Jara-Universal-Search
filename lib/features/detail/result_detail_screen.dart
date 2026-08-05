@@ -240,7 +240,7 @@ class ResultDetailScreen extends ConsumerWidget {
 
     final meta = [
       item.source,
-      relativeDate(s, item.date),
+      relativeDate(s, item.date, now: ref.now),
       if (item.sizeLabel != null) item.sizeLabel!,
       if (item.pageLabel != null) item.pageLabel!,
     ].join(' · ');
@@ -380,7 +380,8 @@ class ResultDetailScreen extends ConsumerWidget {
                 for (var i = 0; i < related.length; i++) ...[
                   UniversalResultCard(
                     item: related[i],
-                    dateLabel: relativeDate(s, related[i].date),
+                    dateLabel:
+                        relativeDate(s, related[i].date, now: ref.now),
                     onTap: () => context.push('/item/${related[i].id}'),
                   ),
                   if (i != related.length - 1)

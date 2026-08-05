@@ -75,7 +75,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
     final repo = ref.watch(memoryRepositoryProvider);
     final stats = ref.watch(memoryStatsProvider);
 
-    final today = _dayOf(DateTime.now());
+    final today = _dayOf(ref.now);
     final days = List.generate(7, (i) => today.subtract(Duration(days: 6 - i)));
     final counts = <DateTime, int>{
       for (final day in days)
@@ -101,7 +101,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
           index: i,
           child: UniversalResultCard(
             item: items[i],
-            dateLabel: relativeDate(s, items[i].date),
+            dateLabel: relativeDate(s, items[i].date, now: ref.now),
             onTap: () => context.push('/item/${items[i].id}'),
             onPin: () => _togglePin(items[i].id),
           ),
@@ -223,7 +223,8 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
           children: [
             Expanded(
               child: Text(
-                s.indexedAgo(relativeDate(s, stats.lastIndexed)),
+                s.indexedAgo(
+                    relativeDate(s, stats.lastIndexed, now: ref.now)),
                 style: JaraType.caption.copyWith(color: t.textOnSkyTertiary),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
